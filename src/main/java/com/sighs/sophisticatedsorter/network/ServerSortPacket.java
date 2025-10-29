@@ -10,24 +10,28 @@ import java.util.function.Supplier;
 
 public class ServerSortPacket {
     private final String sortBy;
+    private final String target;
 
-    public ServerSortPacket(String sortBy) {
+    public ServerSortPacket(String sortBy, String target) {
         this.sortBy = sortBy;
+        this.target = target;
     }
 
     public static void encode(ServerSortPacket msg, FriendlyByteBuf buffer) {
         buffer.writeUtf(msg.sortBy);
+        buffer.writeUtf(msg.target);
     }
 
     public static ServerSortPacket decode(FriendlyByteBuf buffer) {
-        return new ServerSortPacket(buffer.readUtf());
+        return new ServerSortPacket(buffer.readUtf(), buffer.readUtf());
     }
 
     public static void handle(ServerSortPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
-                CoreUtils.sortPlayer(player, SortBy.fromName(msg.sortBy));
+                if (msg.target.equals("inventory")) CoreUtils.sortInventory(player, SortBy.fromName(msg.sortBy));
+                if (msg.target.equals("container")) CoreUtils.sortContainer(player, SortBy.fromName(msg.sortBy));
             }
         });
         ctx.get().setPacketHandled(true);

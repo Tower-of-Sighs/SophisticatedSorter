@@ -38,10 +38,7 @@ public abstract class AbstractContainerScreenMixin extends Screen {
             int x = leftPos + imageWidth - 31;
             int y = topPos + 4;
             var sortButton = new Button(new Position(x, y), ButtonDefinitions.SORT, (button) -> {
-                if (button == 0) {
-                    CoreUtils.serverSort();
-                    Minecraft.getInstance().player.displayClientMessage(Component.literal("Sorted"), true);
-                }
+                if (button == 0) CoreUtils.serverSort();
             });
             this.addRenderableWidget(sortButton);
             var toggleButton = new ToggleButton(new Position(x + 12, y), ButtonDefinitions.SORT_BY, (button) -> {
