@@ -3,11 +3,13 @@ package com.sighs.sophisticatedsorter.utils;
 import com.sighs.sophisticatedsorter.Config;
 import com.sighs.sophisticatedsorter.network.NetworkHandler;
 import com.sighs.sophisticatedsorter.network.ServerSortPacket;
-import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
@@ -33,13 +35,16 @@ public class CoreUtils {
         };
     }
 
-    public static void serverSort() {
+    public static boolean canContainerSort(AbstractContainerMenu menu) {
+        if (menu instanceof InventoryMenu) return false;
+        boolean filter = Config.Filter.get() && menu.slots.size() <= 46;
+        return !filter;
+    }
+
+    public static void serverSort(AbstractContainerMenu menu) {
         String target = "container";
-        Player player = Minecraft.getInstance().player;
-        if (player == null) return;
-        boolean filter = Config.Filter.get() && player.containerMenu.slots.size() <= 46;
-        if (player.containerMenu instanceof InventoryMenu || filter) target = "inventory";
-        NetworkHandler.CHANNEL.sendToServer(new ServerSortPacket(CoreUtils.getSortBy().name(), target));
+        if (!canContainerSort(menu)) target = "inventory";
+        NetworkHandler.CHANNEL.sendToServer(new ServerSortPacket(getSortBy().getSerializedName(), target));
     }
 
     public static void sortContainer(ServerPlayer player, SortBy sortBy) {

@@ -16,7 +16,7 @@ public class KeyInput {
     public static void sort(InputEvent.MouseButton event) {
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
             if (event.getButton() == ModKeybindings.CONTROL_KEY.getKey().getValue()) {
-                CoreUtils.serverSort();
+                CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
             }
         }
     }
@@ -24,7 +24,7 @@ public class KeyInput {
     public static void sort(InputEvent.Key event) {
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
             if (event.getKey() == ModKeybindings.CONTROL_KEY.getKey().getValue()) {
-                CoreUtils.serverSort();
+                CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
             }
         }
     }
