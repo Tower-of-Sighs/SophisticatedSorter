@@ -20,7 +20,7 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = SophisticatedSorter.MODID, value = Dist.CLIENT)
 public class KeyInput {
     @SubscribeEvent
-    public static void sort(InputEvent.MouseButton event) {
+    public static void sort(InputEvent.MouseButton.Post event) {
         if (event.getAction() != InputConstants.PRESS) return;
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
             if (event.getButton() == ModKeybindings.SORT_KEY.getKey().getValue()) {
@@ -44,13 +44,15 @@ public class KeyInput {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof AbstractContainerScreen<?>) {
             if (event.getKey() == ModKeybindings.DISABLE_KEY.getKey().getValue()) {
-                List<String> list = new ArrayList<>(Config.BLACKLIST.get());
-                String current = ClientUtils.getScreenId(screen);
-                if (ClientUtils.isDisabledScreen(screen)) {
-                    list.remove(current);
-                } else list.add(current);
-                Config.BLACKLIST.set(list);
-                Config.BLACKLIST.save();
+                try {
+                    List<String> list = new ArrayList<>(Config.BLACKLIST.get());
+                    String current = ClientUtils.getScreenId(screen);
+                    if (ClientUtils.isDisabledScreen(screen)) {
+                        list.remove(current);
+                    } else list.add(current);
+                    Config.BLACKLIST.set(list);
+                    Config.BLACKLIST.save();
+                } catch (Exception ignored) {}
             }
         }
     }

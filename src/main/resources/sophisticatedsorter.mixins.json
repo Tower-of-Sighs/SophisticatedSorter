@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "sophisticatedsorter.refmap.json",
   "mixins": [
+    "InventorySorterMixin",
     "SearchBoxMixin",
     "SettingsHandlerMixin",
     "StorageContainerMenuBaseMixin"

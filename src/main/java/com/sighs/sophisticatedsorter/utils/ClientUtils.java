@@ -3,6 +3,7 @@ package com.sighs.sophisticatedsorter.utils;
 import com.sighs.sophisticatedsorter.Config;
 import com.sighs.sophisticatedsorter.api.IStorageScreenBase;
 import com.sighs.sophisticatedsorter.visual.VisualStorageScreen;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -19,8 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -49,9 +48,6 @@ public class ClientUtils {
     public static Button createTransferButton(Object... params) {
         if (transferButton != null) {
             try {
-                for (@NotNull Constructor<?> declaredField : transferButton.getDeclaredConstructors()) {
-                    System.out.print(declaredField+"\n");
-                }
                 Constructor<?> constructor = transferButton.getDeclaredConstructor(StorageScreenBase.class, Consumer.class, ButtonDefinition.class, ButtonDefinition.class);
                 constructor.setAccessible(true);
                 return (Button) constructor.newInstance(params);
@@ -68,7 +64,11 @@ public class ClientUtils {
     }
 
     public static boolean isDisabledScreen(Screen screen) {
-        return Config.BLACKLIST.get().contains(getScreenId(screen));
+        boolean result = true;
+        try {
+            result = Config.BLACKLIST.get().contains(getScreenId(screen));
+        } catch (Exception ignored) {}
+        return result;
     }
     public static String getScreenId(Screen screen) {
         return getTranslationKey(screen.getTitle());
@@ -79,5 +79,9 @@ public class ClientUtils {
             return translatable.getKey();
         }
         return null;
+    }
+
+    public static boolean isZhLang() {
+        return Minecraft.getInstance().getLanguageManager().getSelected().contains("zh_");
     }
 }

@@ -9,16 +9,26 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
 
+import java.text.Collator;
 import java.util.*;
 
 public class CoreUtils {
+    public static final Comparator<Map.Entry<ItemStackKey, Integer>> BY_PINYIN =
+            Comparator.comparing((Map.Entry<ItemStackKey, Integer> o) ->
+                            o.getKey().getStack().getHoverName().getString(),
+                    // 使用中文Collator进行拼音排序
+                    Collator.getInstance(Locale.CHINA)
+            );
+
     public static SortBy getSortBy() {
         return SortBy.fromName(Config.SORT_BY.get());
     }
@@ -27,13 +37,15 @@ public class CoreUtils {
         Config.SORT_BY.save();
     }
 
-    public static Comparator<Map.Entry<ItemStackKey, Integer>> getComparator(SortBy sortBy) {
-        return switch (sortBy) {
+    public static Comparator<Map.Entry<ItemStackKey, Integer>> getComparator(SortBy sortBy, boolean zh) {
+        Comparator<Map.Entry<ItemStackKey, Integer>> comparator = switch (sortBy) {
             case COUNT -> InventorySorter.BY_COUNT;
             case TAGS -> InventorySorter.BY_TAGS;
-            case NAME -> InventorySorter.BY_NAME;
+            case NAME -> zh ? BY_PINYIN : InventorySorter.BY_NAME;
             case MOD -> InventorySorter.BY_MOD;
         };
+        if (zh) comparator = comparator.thenComparing(BY_PINYIN);
+        return comparator;
     }
 
     public static boolean canContainerSort(AbstractContainerMenu menu) {
@@ -45,18 +57,24 @@ public class CoreUtils {
     public static void serverSort(AbstractContainerMenu menu) {
         String target = "container";
         if (!canContainerSort(menu)) target = "inventory";
-        NetworkHandler.CHANNEL.sendToServer(new ServerSortPacket(getSortBy().getSerializedName(), target));
+        NetworkHandler.CHANNEL.sendToServer(new ServerSortPacket(getSortBy().getSerializedName(), target, ClientUtils.isZhLang()));
     }
     public static void serverTransfer(boolean transferToContainer, boolean filter) {
         NetworkHandler.CHANNEL.sendToServer(new ServerTransferPacket(transferToContainer, filter));
     }
 
-    public static void sortContainer(ServerPlayer player, SortBy sortBy) {
+    public static boolean isSlotInvalid(Slot slot) {
+        return !slot.mayPlace(ItemStack.EMPTY) || slot instanceof ResultSlot;
+    }
+
+    public static void sortContainer(ServerPlayer player, SortBy sortBy, boolean zh) {
         var menu = player.containerMenu;
         List<Integer> needSort = new ArrayList<>();
 
         for (int i = 0; i < menu.slots.size(); i++) {
-            if (!(menu.getSlot(i).container instanceof Inventory)) needSort.add(i);
+            Slot slot = menu.getSlot(i);
+            if (menu.quickcraftSlots.contains(slot) || isSlotInvalid(slot)) continue;
+            if (!(slot.container instanceof Inventory)) needSort.add(i);
         }
 
         var handler = new ItemStackHandler(needSort.size());
@@ -64,14 +82,14 @@ public class CoreUtils {
             handler.setStackInSlot(i, menu.getSlot(needSort.get(i)).getItem());
         }
 
-        InventorySorter.sortHandler(handler, CoreUtils.getComparator(sortBy), new HashSet<>());
+        InventorySorter.sortHandler(handler, CoreUtils.getComparator(sortBy, zh), new HashSet<>());
 
         for (int i = 0; i < needSort.size(); i++) {
             menu.getSlot(needSort.get(i)).set(handler.getStackInSlot(i));
         }
     }
 
-    public static void sortInventory(ServerPlayer player, SortBy sortBy) {
+    public static void sortInventory(ServerPlayer player, SortBy sortBy, boolean zh) {
         Inventory inventory = player.getInventory();
         var items = inventory.items;
         List<Integer> needSort = new ArrayList<>();
@@ -83,7 +101,7 @@ public class CoreUtils {
             handler.setStackInSlot(i, items.get(needSort.get(i)));
         }
 
-        InventorySorter.sortHandler(handler, CoreUtils.getComparator(sortBy), new HashSet<>());
+        InventorySorter.sortHandler(handler, CoreUtils.getComparator(sortBy, zh), new HashSet<>());
 
         for (int i = 0; i < needSort.size(); i++) {
             inventory.setItem(needSort.get(i), handler.getStackInSlot(i));
