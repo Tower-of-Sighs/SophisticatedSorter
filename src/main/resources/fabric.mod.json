@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "sophisticatedsorter",
+  "version": "${version}",
+  "name": "SophisticatedSorter",
+  "description": "Extends the built-in container sorting, search and transfer functionality of the Sophisticated series to work on the player inventory and all usable containers.",
+  "authors": [
+    "MerrySnow",
+    "Flechazo"
+  ],
+  "contact": {},
+  "license": "GPL-3.0",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.sighs.sophisticatedsorter.client.SophisticatedSorterClient"
+    ],
+    "main": [
+      "com.sighs.sophisticatedsorter.SophisticatedSorter"
+    ],
+    "modmenu": [
+      "com.sighs.sophisticatedsorter.compat.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "sophisticatedsorter.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "accessWidener" : "sophisticatedsorter.accesswidener"
+}
