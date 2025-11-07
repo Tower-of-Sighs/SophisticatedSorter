@@ -12,7 +12,8 @@ import java.util.function.Supplier;
 
 public class VisualSettingsHandler extends SettingsHandler {
     protected VisualSettingsHandler() {
-        super(new CompoundTag(), () -> {}, () -> null, () -> null);
+        super(new CompoundTag(), () -> {
+        }, () -> null, () -> null);
     }
 
     @Override
@@ -42,6 +43,7 @@ public class VisualSettingsHandler extends SettingsHandler {
 
     @Override
     public MainSettingsCategory<?> getGlobalSettingsCategory() {
-        return new MainSettingsCategory<>(new CompoundTag(), n -> {}, "");
+        return new MainSettingsCategory<>(new CompoundTag(), n -> {
+        }, "");
     }
 }

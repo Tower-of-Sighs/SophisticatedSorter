@@ -28,12 +28,25 @@ repositories {
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
     }
     maven { url "https://maven.terraformersmc.com/releases/" }
-    maven { url = "https://mvn.devos.one/releases/" }
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/Salandora/Porting-Lib")
+        credentials {
+            username = System.getenv("USERNAME")
+            password = System.getenv("READ_PACKAGES_TOKEN")
+        }
+        content {
+            includeGroupByRegex "io.github.fabricators_of_create.Porting-Lib.*"
+        }
+    }
+    maven { url = "https://mvn.devos.one/snapshots/" } // Create, Porting Lib
+    maven { url = "https://mvn.devos.one/releases/" } // Porting Lib
     maven {
         name = "entity reach"
         url = "https://maven.jamieswhiteshirt.com/libs-release/"
     }
     maven { url "https://maven.shedaniel.me/" }
+    maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
@@ -41,17 +54,17 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "curse.maven:sophisticated-core-unofficial-fabric-port-979317:7092593"
-    modImplementation "curse.maven:sophisticated-backpacks-unofficial-fabric-port-979322:7147929"
-    modImplementation "curse.maven:just-enough-characters-250702:7176521"
-    modImplementation "curse.maven:sophisticated-storage-unofficial-fabric-port-979326:7125851"
+    modImplementation "curse.maven:sophisticated-core-unofficial-fabric-port-979317:7114191"
+    modImplementation "curse.maven:sophisticated-backpacks-unofficial-fabric-port-979322:6844426"
+    modImplementation "curse.maven:just-enough-characters-250702:6681788"
+    modImplementation "curse.maven:sophisticated-storage-unofficial-fabric-port-979326:7125480"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${project.fcap_version}"
     modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
-
+    modImplementation "com.github.towdium:PinIn:${verpinin}"
     modImplementation "me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}"
-    for (def module in port_lib_modules.split(',')) {
-        modImplementation("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version+$minecraft_version")
+    for (def module in porting_lib_modules.split(',')) {
+        modImplementation("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$porting_lib_version+$minecraft_version")
     }
     modApi("teamreborn:energy:$project.energy_version")
 }

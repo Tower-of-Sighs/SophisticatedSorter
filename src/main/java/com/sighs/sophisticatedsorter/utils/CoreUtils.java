@@ -59,10 +59,11 @@ public class CoreUtils {
     public static void serverSort(AbstractContainerMenu menu) {
         String target = "container";
         if (!canContainerSort(menu)) target = "inventory";
-        NetworkHandler.sendToServer(NetworkHandler.SORT_PACKET_ID, new ServerSortPacket(getSortBy().getSerializedName(), target, ClientUtils.isZhLang()));
+        NetworkHandler.sendToServer(new ServerSortPacket(getSortBy().getSerializedName(), target, ClientUtils.isZhLang()));
     }
+
     public static void serverTransfer(boolean transferToContainer, boolean filter) {
-        NetworkHandler.sendToServer(NetworkHandler.TRANSFER_PACKET_ID, new ServerTransferPacket(transferToContainer, filter));
+        NetworkHandler.sendToServer(new ServerTransferPacket(transferToContainer, filter));
     }
 
     public static boolean isSlotInvalid(Slot slot) {

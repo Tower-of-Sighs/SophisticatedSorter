@@ -24,7 +24,6 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.TextBox;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -38,26 +37,36 @@ import java.util.function.Predicate;
 
 @Mixin(value = AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin extends Screen {
-    @Shadow protected int leftPos;
+    @Shadow
+    protected int leftPos;
 
-    @Shadow protected int imageWidth;
+    @Shadow
+    protected int imageWidth;
 
-    @Shadow protected int topPos;
+    @Shadow
+    protected int topPos;
 
-    @Shadow protected int inventoryLabelX;
+    @Shadow
+    protected int inventoryLabelX;
 
-    @Shadow protected int inventoryLabelY;
+    @Shadow
+    protected int inventoryLabelY;
 
-    @Shadow protected abstract void init();
+    @Shadow
+    protected abstract void init();
 
     protected AbstractContainerScreenMixin(Component p_96550_) {
         super(p_96550_);
     }
 
-    @Unique private boolean isScreenDisabled = true;
-    @Unique private boolean isInventoryScreen = false;
-    @Unique private boolean canContainerSort = false;
-    @Unique private TextBox searchBox;
+    @Unique
+    private boolean isScreenDisabled = true;
+    @Unique
+    private boolean isInventoryScreen = false;
+    @Unique
+    private boolean canContainerSort = false;
+    @Unique
+    private TextBox searchBox;
 
     @Inject(method = "init", at = @At("RETURN"))
     private void q(CallbackInfo ci) {
@@ -178,6 +187,7 @@ public abstract class AbstractContainerScreenMixin extends Screen {
             RenderSystem.setShaderColor(0.3f, 0.3f, 0.3f, 1.0f);
         }
     }
+
     @Inject(method = "renderSlot", at = @At("RETURN"))
     private void onRenderSlotReturn(GuiGraphics guiGraphics, Slot slot, CallbackInfo ci) {
         if ((Object) this instanceof CreativeModeInventoryScreen) return;

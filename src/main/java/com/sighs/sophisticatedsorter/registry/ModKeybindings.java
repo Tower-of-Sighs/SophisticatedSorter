@@ -9,6 +9,7 @@ public class ModKeybindings {
 
     public static KeyMapping SORT_KEY;
     public static KeyMapping DISABLE_KEY;
+
     public static void registerKeyMapping() {
         SORT_KEY = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.sophisticatedsorter.sort",

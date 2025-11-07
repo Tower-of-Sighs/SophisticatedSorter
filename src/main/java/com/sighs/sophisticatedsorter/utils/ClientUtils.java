@@ -31,7 +31,8 @@ public class ClientUtils {
         try {
             searchBoxClass = Class.forName("net.p3pp3rf1y.sophisticatedcore.client.gui.SearchBox");
             transferButton = Class.forName("net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase$TransferButton");
-        } catch (ClassNotFoundException ignored) {}
+        } catch (ClassNotFoundException ignored) {
+        }
     }
 
     public static TextBox createSearchBox(Object... params) {
@@ -40,10 +41,12 @@ public class ClientUtils {
                 Constructor<?> constructor = searchBoxClass.getDeclaredConstructor(Position.class, Dimension.class, StorageScreenBase.class);
                 constructor.setAccessible(true);
                 return (TextBox) constructor.newInstance(params);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return null;
     }
+
     public static Button createTransferButton(Object... params) {
         if (transferButton != null) {
             try {
@@ -66,12 +69,15 @@ public class ClientUtils {
         boolean result = true;
         try {
             result = ModConfig.INSTANCE.BLACK_LIST.contains(getScreenId(screen));
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return result;
     }
+
     public static String getScreenId(Screen screen) {
         return getTranslationKey(screen.getTitle());
     }
+
     private static String getTranslationKey(Component component) {
         ComponentContents contents = component.getContents();
         if (contents instanceof TranslatableContents translatable) {

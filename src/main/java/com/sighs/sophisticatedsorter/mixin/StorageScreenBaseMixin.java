@@ -14,9 +14,11 @@ import java.util.function.Predicate;
 
 @Mixin(value = StorageScreenBase.class, remap = false)
 public abstract class StorageScreenBaseMixin implements IStorageScreenBase {
-    @Shadow protected abstract void updateSearchFilter(String searchPhrase);
+    @Shadow
+    protected abstract void updateSearchFilter(String searchPhrase);
 
-    @Shadow public abstract Predicate<ItemStack> getStackFilter();
+    @Shadow
+    public abstract Predicate<ItemStack> getStackFilter();
 
     public Predicate<ItemStack> getVisualStackFilter(String searchPhrase) {
         updateSearchFilter(searchPhrase);

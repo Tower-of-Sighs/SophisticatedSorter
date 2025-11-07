@@ -4,7 +4,8 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
 public final class FabricInputEvents {
-    private FabricInputEvents() {}
+    private FabricInputEvents() {
+    }
 
     // MouseButton.Pre：返回 true 表示取消
     public interface MouseButtonPreCallback {

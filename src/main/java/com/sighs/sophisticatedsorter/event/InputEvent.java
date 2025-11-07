@@ -1,7 +1,8 @@
 package com.sighs.sophisticatedsorter.event;
 
 public abstract class InputEvent {
-    protected InputEvent() {}
+    protected InputEvent() {
+    }
 
     public static abstract class MouseButton extends InputEvent {
         private final int button;

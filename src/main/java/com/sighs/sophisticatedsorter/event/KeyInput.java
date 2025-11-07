@@ -47,7 +47,8 @@ public class KeyInput {
                         list = list.stream().distinct().toList();
                         ModConfig.INSTANCE.BLACK_LIST = list;
                         AutoConfig.getConfigHolder(ModConfig.class).save();
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         });

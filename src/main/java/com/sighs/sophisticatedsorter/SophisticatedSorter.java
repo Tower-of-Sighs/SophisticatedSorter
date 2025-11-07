@@ -5,6 +5,7 @@ import net.fabricmc.api.ModInitializer;
 
 public class SophisticatedSorter implements ModInitializer {
     public static final String MODID = "sophisticatedsorter";
+
     @Override
     public void onInitialize() {
         ModConfig.register();

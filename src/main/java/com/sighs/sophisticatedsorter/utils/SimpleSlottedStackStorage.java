@@ -1,18 +1,18 @@
 package com.sighs.sophisticatedsorter.utils;
 
-import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class SimpleSlottedStackStorage implements SlottedStackStorage {
+public class SimpleSlottedStackStorage implements IItemHandlerSimpleInserter {
     private final List<ItemStack> stacks;
     private final int slotLimit;
     private final List<SingleSlotStorage<ItemVariant>> slotStorages;
@@ -110,6 +110,7 @@ public class SimpleSlottedStackStorage implements SlottedStackStorage {
             return this;
         }
     }
+
     private class SimpleSingleSlotStorage implements SingleSlotStorage<ItemVariant> {
         private final int index;
 
