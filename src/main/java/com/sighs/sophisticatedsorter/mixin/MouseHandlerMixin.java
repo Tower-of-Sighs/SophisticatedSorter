@@ -1,6 +1,5 @@
 package com.sighs.sophisticatedsorter.mixin;
 
-import com.sighs.sophisticatedsorter.event.FabricInputEvents;
 import com.sighs.sophisticatedsorter.event.InputEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
@@ -12,49 +11,64 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MouseHandler.class)
-public class MouseHandlerMixin {
+public abstract class MouseHandlerMixin {
+    @Shadow
+    private double xpos;
+    @Shadow
+    private double ypos;
+
+    @Shadow
+    public abstract boolean isLeftPressed();
+
+    @Shadow
+    public abstract boolean isMiddlePressed();
+
+    @Shadow
+    public abstract boolean isRightPressed();
+
     @Shadow
     @Final
     private Minecraft minecraft;
 
-    @Inject(method = "onPress", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "onPress",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/Options;touchscreen()Lnet/minecraft/client/OptionInstance;",
+                    ordinal = 0,
+                    shift = At.Shift.BEFORE
+            ),
+            cancellable = true
+    )
     private void sophisticatedSorter$onMouseButtonPre(long window, int button, int action, int modifiers, CallbackInfo ci) {
-        boolean canceled = FabricInputEvents.MOUSE_BUTTON_PRE.invoker()
-                .onMouseButtonPre(new InputEvent.MouseButton.Pre(button, action, modifiers));
-        if (canceled) {
+        if (window != this.minecraft.getWindow().getWindow()) {
+            return;
+        }
+        boolean cancel = InputEvent.MOUSE_BUTTON_PRE.invoker().onMouseButtonPre(button, action, modifiers);
+        if (cancel) {
             ci.cancel();
         }
     }
 
     @Inject(method = "onPress", at = @At("TAIL"))
     private void sophisticatedSorter$onMouseButtonPost(long window, int button, int action, int modifiers, CallbackInfo ci) {
-        FabricInputEvents.MOUSE_BUTTON_POST.invoker()
-                .onMouseButtonPost(new InputEvent.MouseButton.Post(button, action, modifiers));
+        if (window != this.minecraft.getWindow().getWindow()) {
+            return;
+        }
+        InputEvent.MOUSE_BUTTON_POST.invoker().onMouseButtonPost(button, action, modifiers);
     }
 
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
-    private void sophisticatedSorter$onMouseScroll(long window, double horizontal, double vertical, CallbackInfo ci) {
-        double offset = vertical;
-        if (Minecraft.ON_OSX && vertical == 0) {
-            offset = horizontal;
+    private void diligentstalker$onScroll(long window, double xOffset, double yOffset, CallbackInfo ci) {
+        if (window != this.minecraft.getWindow().getWindow()) {
+            return;
         }
-        double normalized = (this.minecraft.options.discreteMouseScroll().get() ? Math.signum(offset) : offset)
-                * this.minecraft.options.mouseWheelSensitivity().get();
-
-        if (this.minecraft.getOverlay() == null && this.minecraft.screen == null && this.minecraft.player != null) {
-            MouseHandler self = (MouseHandler) (Object) this;
-            InputEvent.MouseScrollingEvent event = new InputEvent.MouseScrollingEvent(
-                    normalized,
-                    self.isLeftPressed(),
-                    self.isMiddlePressed(),
-                    self.isRightPressed(),
-                    self.xpos(),
-                    self.ypos()
-            );
-            boolean canceled = FabricInputEvents.MOUSE_SCROLL.invoker().onMouseScroll(event);
-            if (canceled) {
-                ci.cancel();
-            }
+        double offset = (Minecraft.ON_OSX && yOffset == 0) ? xOffset : yOffset;
+        if (InputEvent.MOUSE_SCROLL.invoker().onMouseScroll(
+                offset, xOffset, yOffset,
+                isLeftPressed(), isMiddlePressed(), isRightPressed()
+        )) {
+            ci.cancel();
         }
     }
 }
