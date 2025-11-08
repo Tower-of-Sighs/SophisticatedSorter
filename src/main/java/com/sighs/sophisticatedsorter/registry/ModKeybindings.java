@@ -13,14 +13,14 @@ public class ModKeybindings {
     public static void registerKeyMapping() {
         SORT_KEY = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.sophisticatedsorter.sort",
-                InputConstants.Type.SCANCODE,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_R,
                 "key.categories.sophisticatedsorter"
         ));
 
         DISABLE_KEY = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.sophisticatedsorter.disable",
-                InputConstants.Type.SCANCODE,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_U,
                 "key.categories.sophisticatedsorter"
         ));
