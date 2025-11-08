@@ -15,41 +15,44 @@ import java.util.List;
 
 public class KeyInput {
     public static void register() {
-        FabricInputEvents.MOUSE_BUTTON_POST.register(event -> {
-            if (event.getAction() != InputConstants.PRESS) {
-                return;
-            }
-            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
-                if (ModKeybindings.SORT_KEY.matchesMouse(event.getButton())) {
-                    CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
-                }
-            }
-        });
+        InputEvent.MOUSE_BUTTON_POST.register(KeyInput::sort);
+        InputEvent.KEY.register(KeyInput::keyPress);
+    }
 
-        FabricInputEvents.KEY.register(event -> {
-            if (event.getAction() != InputConstants.PRESS) {
-                return;
+    private static void sort(int button, int action, int modifiers) {
+        if (action != InputConstants.PRESS) {
+            return;
+        }
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
+            if (ModKeybindings.matchesMouse(ModKeybindings.SORT_KEY, button)) {
+                CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
             }
-            Screen screen = Minecraft.getInstance().screen;
-            if (screen instanceof AbstractContainerScreen<?>) {
-                if (ModKeybindings.SORT_KEY.matches(event.getKey(), event.getScanCode())) {
-                    CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
-                }
-                if (ModKeybindings.DISABLE_KEY.matches(event.getKey(), event.getScanCode())) {
-                    try {
-                        List<String> list = new ArrayList<>(ModConfig.INSTANCE.BLACK_LIST);
-                        String current = ClientUtils.getScreenId(screen);
-                        if (ClientUtils.isDisabledScreen(screen)) {
-                            list.remove(current);
-                        } else {
-                            list.add(current);
-                        }
-                        list = list.stream().distinct().toList();
-                        ModConfig.INSTANCE.BLACK_LIST = list;
-                        AutoConfig.getConfigHolder(ModConfig.class).save();
-                    } catch (Exception ignored) {}
-                }
+        }
+    }
+
+    private static void keyPress(int key, int scancode, int action, int modifiers) {
+        if (action != InputConstants.PRESS) {
+            return;
+        }
+        Screen screen = Minecraft.getInstance().screen;
+        if (screen instanceof AbstractContainerScreen<?>) {
+            if (ModKeybindings.SORT_KEY.matches(key, scancode)) {
+                CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
             }
-        });
+            if (ModKeybindings.DISABLE_KEY.matches(key, scancode)) {
+                try {
+                    List<String> list = new ArrayList<>(ModConfig.INSTANCE.BLACK_LIST);
+                    String current = ClientUtils.getScreenId(screen);
+                    if (ClientUtils.isDisabledScreen(screen)) {
+                        list.remove(current);
+                    } else {
+                        list.add(current);
+                    }
+                    list = list.stream().distinct().toList();
+                    ModConfig.INSTANCE.BLACK_LIST = list;
+                    AutoConfig.getConfigHolder(ModConfig.class).save();
+                } catch (Exception ignored) {}
+            }
+        }
     }
 }
