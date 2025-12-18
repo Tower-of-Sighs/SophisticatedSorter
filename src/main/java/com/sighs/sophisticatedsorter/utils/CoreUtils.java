@@ -1,18 +1,13 @@
 package com.sighs.sophisticatedsorter.utils;
 
-import com.sighs.sophisticatedsorter.Config;
-import com.sighs.sophisticatedsorter.network.NetworkHandler;
-import com.sighs.sophisticatedsorter.network.ServerSortPacket;
-import com.sighs.sophisticatedsorter.network.ServerTransferPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
@@ -29,14 +24,6 @@ public class CoreUtils {
                     Collator.getInstance(Locale.CHINA)
             );
 
-    public static SortBy getSortBy() {
-        return SortBy.fromName(Config.SORT_BY.get());
-    }
-    public static void toggleSortBy() {
-        Config.SORT_BY.set(getSortBy().next().getSerializedName());
-        Config.SORT_BY.save();
-    }
-
     public static Comparator<Map.Entry<ItemStackKey, Integer>> getComparator(SortBy sortBy, boolean zh) {
         Comparator<Map.Entry<ItemStackKey, Integer>> comparator = switch (sortBy) {
             case COUNT -> InventorySorter.BY_COUNT;
@@ -48,26 +35,11 @@ public class CoreUtils {
         return comparator;
     }
 
-    public static boolean canContainerSort(AbstractContainerMenu menu) {
-        if (menu instanceof InventoryMenu) return false;
-        boolean filter = Config.Filter.get() && menu.slots.size() <= 46;
-        return !filter;
-    }
-
-    public static void serverSort(AbstractContainerMenu menu) {
-        String target = "container";
-        if (!canContainerSort(menu)) target = "inventory";
-        NetworkHandler.CHANNEL.sendToServer(new ServerSortPacket(getSortBy().getSerializedName(), target, ClientUtils.isZhLang()));
-    }
-    public static void serverTransfer(boolean transferToContainer, boolean filter) {
-        NetworkHandler.CHANNEL.sendToServer(new ServerTransferPacket(transferToContainer, filter));
-    }
-
     public static boolean isSlotInvalid(Slot slot) {
-        return !slot.mayPlace(ItemStack.EMPTY) || slot instanceof ResultSlot;
+        return !slot.mayPlace(new ItemStack(Items.BARRIER)) || slot instanceof ResultSlot;
     }
 
-    public static void sortContainer(ServerPlayer player, SortBy sortBy, boolean zh) {
+    public static void sortContainer(Player player, SortBy sortBy, boolean zh) {
         var menu = player.containerMenu;
         List<Integer> needSort = new ArrayList<>();
 
@@ -89,7 +61,7 @@ public class CoreUtils {
         }
     }
 
-    public static void sortInventory(ServerPlayer player, SortBy sortBy, boolean zh) {
+    public static void sortInventory(Player player, SortBy sortBy, boolean zh) {
         Inventory inventory = player.getInventory();
         var items = inventory.items;
         List<Integer> needSort = new ArrayList<>();

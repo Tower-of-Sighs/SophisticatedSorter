@@ -2,7 +2,6 @@ package com.sighs.sophisticatedsorter.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.sighs.sophisticatedsorter.utils.ClientUtils;
-import com.sighs.sophisticatedsorter.utils.CoreUtils;
 import com.sighs.sophisticatedsorter.visual.VisualStorageScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,6 +12,7 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedcore.Config;
@@ -24,7 +24,6 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.TextBox;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -56,20 +55,70 @@ public abstract class AbstractContainerScreenMixin extends Screen {
 
     @Unique private boolean isScreenDisabled = true;
     @Unique private boolean isInventoryScreen = false;
-    @Unique private boolean canContainerSort = false;
     @Unique private TextBox searchBox;
+    @Unique private ToggleButton toggleButton;
+    @Unique private Button sortButton;
+    @Unique private Button transferToInventoryButton;
+    @Unique private Button transferToStorageButton;
 
     @Inject(method = "init", at = @At("RETURN"))
     private void q(CallbackInfo ci) {
         if ((Object) this instanceof CreativeModeInventoryScreen) return;
-        isScreenDisabled = ClientUtils.isDisabledScreen(this);
+        isScreenDisabled = !ClientUtils.isValidScreen();
         if ((Object) this instanceof StorageScreenBase) return;
-        if (isScreenDisabled) return;
 
         var menu = Minecraft.getInstance().player.containerMenu;
         isInventoryScreen = Minecraft.getInstance().screen instanceof InventoryScreen;
-        canContainerSort = CoreUtils.canContainerSort(menu);
-        if (!canContainerSort && !isInventoryScreen) return;
+        if (!isInventoryScreen && isScreenDisabled) return;
+
+        Position blankPosition = new Position(0, 0);
+        Position searchPosition = new Position(leftPos + 7, topPos + 5);
+
+        SortButtonsPosition sortButtonsPosition = Config.CLIENT.sortButtonsPosition.get();
+        if (sortButtonsPosition != SortButtonsPosition.HIDDEN) {
+            toggleButton = new ToggleButton(blankPosition, ButtonDefinitions.SORT_BY, (button) -> {
+                if (button == 0) ClientUtils.toggleSortBy();
+            }, ClientUtils::getSortBy);
+            this.addRenderableWidget(toggleButton);
+
+            sortButton = new Button(blankPosition, ButtonDefinitions.SORT, (button) -> {
+                if (button == 0) ClientUtils.serverSort();
+            });
+            this.addRenderableWidget(sortButton);
+
+            if (!isInventoryScreen) {
+                int xEnd = sortButtonsPosition == SortButtonsPosition.TITLE_LINE_RIGHT ? new Position(leftPos + imageWidth - 31, topPos + 4).x() - 1 - leftPos : imageWidth - 7;
+                int _width = xEnd - 7;
+                searchBox = ClientUtils.createSearchBox(searchPosition, new Dimension(_width, 10), null);
+                this.addRenderableWidget(searchBox);
+
+                var visualScreen = new VisualStorageScreen();
+
+                Consumer<Boolean> transferToInventory = filterByContents -> ClientUtils.serverTransfer(false, filterByContents);
+                transferToInventoryButton = ClientUtils.createTransferButton(
+                        visualScreen,
+                        transferToInventory,
+                        ButtonDefinitions.TRANSFER_TO_INVENTORY,
+                        ButtonDefinitions.TRANSFER_TO_INVENTORY_FILTERED
+                );
+                addRenderableWidget(transferToInventoryButton);
+
+                Consumer<Boolean> transferToStorage = filterByContents -> ClientUtils.serverTransfer(true, filterByContents);
+                transferToStorageButton = ClientUtils.createTransferButton(
+                        visualScreen,
+                        transferToStorage,
+                        ButtonDefinitions.TRANSFER_TO_STORAGE,
+                        ButtonDefinitions.TRANSFER_TO_STORAGE_FILTERED
+                );
+                addRenderableWidget(transferToStorageButton);
+            }
+        }
+
+        resetWidgetPosition(menu);
+    }
+
+    private void resetWidgetPosition(AbstractContainerMenu menu) {
+        if (sortButton == null) return;
 
         Position topPosition1 = new Position(leftPos + imageWidth - 19, topPos + 4);
         Position topPosition2 = new Position(leftPos + imageWidth - 31, topPos + 4);
@@ -91,48 +140,17 @@ public abstract class AbstractContainerScreenMixin extends Screen {
             bottomPosition2 = new Position(leftPos + inventoryRight - 7, topPos + inventoryTop - 13);
         }
 
-        SortButtonsPosition sortButtonsPosition = Config.CLIENT.sortButtonsPosition.get();
-        if (sortButtonsPosition != SortButtonsPosition.HIDDEN) {
-            var toggleButton = new ToggleButton(topPosition1, ButtonDefinitions.SORT_BY, (button) -> {
-                if (button == 0) CoreUtils.toggleSortBy();
-            }, CoreUtils::getSortBy);
-            if (isInventoryScreen) toggleButton.setPosition(bottomPosition1);
-            this.addRenderableWidget(toggleButton);
-
-            var sortButton = new Button(topPosition2, ButtonDefinitions.SORT, (button) -> {
-                if (button == 0) CoreUtils.serverSort(menu);
-            });
-            if (isInventoryScreen) sortButton.setPosition(bottomPosition2);
-            this.addRenderableWidget(sortButton);
-
-            if (!isInventoryScreen) {
-                int xEnd = sortButtonsPosition == SortButtonsPosition.TITLE_LINE_RIGHT ? new Position(leftPos + imageWidth - 31, topPos + 4).x() - 1 - leftPos : imageWidth - 7;
-                int _width = xEnd - 7;
-                searchBox = ClientUtils.createSearchBox(new Position(leftPos + 7, topPos + 5), new Dimension(_width, 10), null);
-                this.addRenderableWidget(searchBox);
-
-                var visualScreen = new VisualStorageScreen();
-
-                Consumer<Boolean> transferToInventory = filterByContents -> CoreUtils.serverTransfer(false, filterByContents);
-                var transferToInventoryButton = ClientUtils.createTransferButton(
-                        visualScreen,
-                        transferToInventory,
-                        ButtonDefinitions.TRANSFER_TO_INVENTORY,
-                        ButtonDefinitions.TRANSFER_TO_INVENTORY_FILTERED
-                );
-                transferToInventoryButton.setPosition(bottomPosition1);
-                addRenderableWidget(transferToInventoryButton);
-
-                Consumer<Boolean> transferToStorage = filterByContents -> CoreUtils.serverTransfer(true, filterByContents);
-                var transferToStorageButton = ClientUtils.createTransferButton(
-                        visualScreen,
-                        transferToStorage,
-                        ButtonDefinitions.TRANSFER_TO_STORAGE,
-                        ButtonDefinitions.TRANSFER_TO_STORAGE_FILTERED
-                );
-                transferToStorageButton.setPosition(bottomPosition2);
-                addRenderableWidget(transferToStorageButton);
-            }
+        if (isInventoryScreen) {
+            toggleButton.setPosition(bottomPosition1);
+            sortButton.setPosition(bottomPosition2);
+        }
+        else {
+            toggleButton.setPosition(topPosition1);
+            sortButton.setPosition(topPosition2);
+        }
+        if (searchBox != null) {
+            transferToInventoryButton.setPosition(bottomPosition1);
+            transferToStorageButton.setPosition(bottomPosition2);
         }
     }
 
@@ -164,11 +182,12 @@ public abstract class AbstractContainerScreenMixin extends Screen {
             if (searchBox.getValue().isEmpty()) stackPredicate = null;
             else stackPredicate = ClientUtils.getStackFilter(searchBox.getValue());
         }
-        if (isScreenDisabled != ClientUtils.isDisabledScreen(this)) {
-            isScreenDisabled = ClientUtils.isDisabledScreen(this);
+        if (isScreenDisabled == ClientUtils.isValidScreen()) {
             this.renderables.clear();
             init();
         }
+        var menu = Minecraft.getInstance().player.containerMenu;
+        resetWidgetPosition(menu);
     }
 
     @Inject(method = "renderSlot", at = @At("HEAD"))

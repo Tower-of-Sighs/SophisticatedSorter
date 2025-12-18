@@ -1,6 +1,5 @@
 package com.sighs.sophisticatedsorter;
 
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod;
 
@@ -12,8 +11,10 @@ public class Config {
     public static final ForgeConfigSpec SPEC;
 
     public static ForgeConfigSpec.ConfigValue<String> SORT_BY;
-    public static ForgeConfigSpec.ConfigValue<Boolean> Filter;
+    public static ForgeConfigSpec.ConfigValue<Boolean> FILTER1;
+    public static ForgeConfigSpec.ConfigValue<Boolean> FILTER2;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
+    public static ForgeConfigSpec.ConfigValue<Boolean> PINYIN;
 
     static {
         BUILDER.push("Sorter Setting");
@@ -21,15 +22,21 @@ public class Config {
         SORT_BY = BUILDER
                 .comment("name, mod, count, tags")
                 .define("SortBy", "name");
-        Filter = BUILDER
+        FILTER1 = BUILDER
                 .comment("Only valid for containers with more than 10 slots if true.")
-                .define("Filter", true);
+                .define("Filter1", true);
+        FILTER2 = BUILDER
+                .comment("Only valid for containers without invalid slot such as recipe result slot if true.")
+                .define("Filter2", true);
         BLACKLIST = BUILDER
-                .comment("Blacklist of screens.")
-                .defineList("Blacklist",
+                .comment("Special of screens.")
+                .defineList("specialList",
                         List.of(),
                         entry -> entry instanceof String
                 );
+        PINYIN = BUILDER
+                .comment("是否启用默认拼音排序。")
+                .define("pinyin", true);
 
         SPEC = BUILDER.build();
     }

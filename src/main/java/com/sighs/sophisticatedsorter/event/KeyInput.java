@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.sighs.sophisticatedsorter.Config;
 import com.sighs.sophisticatedsorter.registry.ModKeybindings;
 import com.sighs.sophisticatedsorter.utils.ClientUtils;
-import com.sighs.sophisticatedsorter.utils.CoreUtils;
 import com.sighs.sophisticatedsorter.SophisticatedSorter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -22,18 +21,18 @@ public class KeyInput {
     @SubscribeEvent
     public static void sort(InputEvent.MouseButton.Post event) {
         if (event.getAction() != InputConstants.PRESS) return;
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen) {
             if (event.getButton() == ModKeybindings.SORT_KEY.getKey().getValue()) {
-                CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
+                ClientUtils.serverSort();
             }
         }
     }
     @SubscribeEvent
     public static void sort(InputEvent.Key event) {
         if (event.getAction() != InputConstants.PRESS) return;
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen) {
             if (event.getKey() == ModKeybindings.SORT_KEY.getKey().getValue()) {
-                CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
+                ClientUtils.serverSort();
             }
         }
     }

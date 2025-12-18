@@ -100,6 +100,14 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', mod_id
         }
 
+        client2 {
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            parent minecraft.runs.client
+            property 'forge.enabledGameTestNamespaces', mod_id
+            workingDirectory project.file('./run/client_a')
+            args '--username', 'Mafuyu404'
+        }
+
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
             args '--nogui'
@@ -177,8 +185,13 @@ dependencies {
     implementation fg.deobf("curse.maven:sophisticated-core-618298:6190554")
     implementation fg.deobf("curse.maven:sophisticated-backpacks-422301:6178588")
     implementation fg.deobf("curse.maven:just-enough-characters-250702:6680042")
-    implementation fg.deobf("curse.maven:sophisticated-storage-619320:7169410")
-
+//    implementation fg.deobf("curse.maven:sophisticated-storage-619320:7169410")
+//    implementation fg.deobf("curse.maven:apothic-attributes-898963:5634071")
+//    implementation fg.deobf("curse.maven:placebo-283644:6274231")
+//    implementation fg.deobf("curse.maven:apotheosis-313970:6461960")
+//    implementation fg.deobf("curse.maven:dynamiclights-reforged-551736:6044481")
+    implementation fg.deobf("curse.maven:embeddium-908741:5681725")
+    implementation fg.deobf("curse.maven:curios-309927:5843594")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
