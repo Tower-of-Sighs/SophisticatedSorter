@@ -1,23 +1,23 @@
 package com.sighs.sophisticatedsorter;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = SophisticatedSorter.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
+// Demonstrates how to use Neo's config APIs
 public class Config {
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-    public static final ForgeConfigSpec SPEC;
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    public static final ModConfigSpec SPEC;
 
-    public static ForgeConfigSpec.ConfigValue<String> SORT_BY;
-    public static ForgeConfigSpec.ConfigValue<Boolean> FILTER1;
-    public static ForgeConfigSpec.ConfigValue<Boolean> FILTER2;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
-    public static ForgeConfigSpec.ConfigValue<Boolean> PINYIN;
+    public static ModConfigSpec.ConfigValue<String> SORT_BY;
+    public static ModConfigSpec.ConfigValue<Boolean> FILTER1;
+    public static ModConfigSpec.ConfigValue<Boolean> FILTER2;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
+    public static ModConfigSpec.ConfigValue<Boolean> PINYIN;
 
     static {
-        BUILDER.push("Sorter Setting");
+        BUILDER.push("Setting");
 
         SORT_BY = BUILDER
                 .comment("name, mod, count, tags")

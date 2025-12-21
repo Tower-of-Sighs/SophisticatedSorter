@@ -1,36 +1,34 @@
 package com.sighs.sophisticatedsorter.network;
 
+import com.sighs.sophisticatedsorter.SophisticatedSorter;
 import com.sighs.sophisticatedsorter.utils.CoreUtils;
-import net.minecraft.network.FriendlyByteBuf;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record ServerTransferPacket(boolean transferToContainer, boolean filter) implements CustomPacketPayload {
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(SophisticatedSorter.MODID, "server_transfer");
+    public static final Type<ServerTransferPacket> TYPE = new Type<>(ID);
 
-public class ServerTransferPacket {
-    private final boolean transferToContainer;
-    private final boolean filter;
+    public static final StreamCodec<ByteBuf, ServerTransferPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.BOOL,
+            ServerTransferPacket::transferToContainer,
+            ByteBufCodecs.BOOL,
+            ServerTransferPacket::filter,
+            ServerTransferPacket::new
+    );
 
-    public ServerTransferPacket(boolean transferToContainer, boolean filter) {
-        this.transferToContainer = transferToContainer;
-        this.filter = filter;
+    public static void execute(ServerTransferPacket msg, IPayloadContext context) {
+        ServerPlayer player = (ServerPlayer) context.player();
+        CoreUtils.transfer(player, msg.transferToContainer, msg.filter);
     }
 
-    public static void encode(ServerTransferPacket msg, FriendlyByteBuf buffer) {
-        buffer.writeBoolean(msg.transferToContainer);
-        buffer.writeBoolean(msg.filter);
-    }
-
-    public static ServerTransferPacket decode(FriendlyByteBuf buffer) {
-        return new ServerTransferPacket(buffer.readBoolean(), buffer.readBoolean());
-    }
-
-    public static void handle(ServerTransferPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
-            if (player != null) CoreUtils.transfer(player, msg.transferToContainer, msg.filter);
-        });
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

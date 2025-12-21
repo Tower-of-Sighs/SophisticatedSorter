@@ -2,24 +2,21 @@ package com.sighs.sophisticatedsorter.utils;
 
 import com.sighs.sophisticatedsorter.Config;
 import com.sighs.sophisticatedsorter.api.IStorageScreenBase;
-import com.sighs.sophisticatedsorter.network.NetworkHandler;
 import com.sighs.sophisticatedsorter.network.ServerSortPacket;
 import com.sighs.sophisticatedsorter.network.ServerTransferPacket;
 import com.sighs.sophisticatedsorter.visual.VisualStorageScreen;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
@@ -29,6 +26,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.util.function.Consumer;
@@ -79,7 +77,6 @@ public class ClientUtils {
         try {
             result = Config.BLACKLIST.get().contains(getScreenId(screen));
         } catch (Exception ignored) {}
-
         return result;
     }
     public static String getScreenId(Screen screen) {
@@ -98,6 +95,18 @@ public class ClientUtils {
         return Minecraft.getInstance().getLanguageManager().getSelected().contains("zh_");
     }
 
+    public static void serverSort() {
+        String target = "container";
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen) {
+            if (screen instanceof StorageScreenBase) return;
+            if (!isValidScreen()) target = "inventory";
+            PacketDistributor.sendToServer(new ServerSortPacket(getSortBy().getSerializedName(), target, ClientUtils.isZhLang()));
+        }
+    }
+    public static void serverTransfer(boolean transferToContainer, boolean filter) {
+        PacketDistributor.sendToServer(new ServerTransferPacket(transferToContainer, filter));
+    }
+
     public static boolean isValidScreen() {
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen) {
             if (screen instanceof InventoryScreen) return false;
@@ -113,22 +122,6 @@ public class ClientUtils {
             return !isDisabledScreen(screen) && !filter1 && !filter2;
         }
         return false;
-    }
-
-    public static void serverSort() {
-        String target = "container";
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen) {
-            if (!isValidScreen()) target = "inventory";
-            NetworkHandler.CHANNEL.sendToServer(new ServerSortPacket(getSortBy().getSerializedName(), target, ClientUtils.isZhLang()));
-//            Player player = Minecraft.getInstance().player;
-//            if (target.equals("container")) CoreUtils.sortContainer(player, getSortBy(), isZhLang());
-//            if (target.equals("inventory")) CoreUtils.sortInventory(player, getSortBy(), isZhLang());
-//            syncAllSlots();
-        }
-    }
-    public static void serverTransfer(boolean transferToContainer, boolean filter) {
-        NetworkHandler.CHANNEL.sendToServer(new ServerTransferPacket(transferToContainer, filter));
-//        CoreUtils.transfer(Minecraft.getInstance().player, transferToContainer, filter);
     }
 
     public static SortBy getSortBy() {

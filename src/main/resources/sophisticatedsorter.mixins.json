@@ -2,8 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.sighs.sophisticatedsorter.mixin",
-  "compatibilityLevel": "JAVA_8",
-  "refmap": "sophisticatedsorter.refmap.json",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "InventorySorterMixin",
     "SearchBoxMixin",

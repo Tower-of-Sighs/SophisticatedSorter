@@ -1,14 +1,19 @@
 package com.sighs.sophisticatedsorter.utils;
 
+import com.sighs.sophisticatedsorter.Config;
+import com.sighs.sophisticatedsorter.network.ServerSortPacket;
+import com.sighs.sophisticatedsorter.network.ServerTransferPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
@@ -36,16 +41,16 @@ public class CoreUtils {
     }
 
     public static boolean isSlotInvalid(Slot slot) {
-        return !slot.mayPlace(new ItemStack(Items.BARRIER)) || slot instanceof ResultSlot;
+        return !slot.mayPlace(ItemStack.EMPTY) || slot instanceof ResultSlot;
     }
 
-    public static void sortContainer(Player player, SortBy sortBy, boolean zh) {
+    public static void sortContainer(ServerPlayer player, SortBy sortBy, boolean zh) {
         var menu = player.containerMenu;
         List<Integer> needSort = new ArrayList<>();
 
         for (int i = 0; i < menu.slots.size(); i++) {
             Slot slot = menu.getSlot(i);
-            if (menu.quickcraftSlots.contains(slot) || isSlotInvalid(slot)) continue;
+            if (isSlotInvalid(slot)) continue;
             if (!(slot.container instanceof Inventory)) needSort.add(i);
         }
 
@@ -61,7 +66,7 @@ public class CoreUtils {
         }
     }
 
-    public static void sortInventory(Player player, SortBy sortBy, boolean zh) {
+    public static void sortInventory(ServerPlayer player, SortBy sortBy, boolean zh) {
         Inventory inventory = player.getInventory();
         var items = inventory.items;
         List<Integer> needSort = new ArrayList<>();

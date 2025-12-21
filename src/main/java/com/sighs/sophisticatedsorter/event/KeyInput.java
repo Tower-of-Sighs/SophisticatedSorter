@@ -1,22 +1,25 @@
 package com.sighs.sophisticatedsorter.event;
 
+
 import com.mojang.blaze3d.platform.InputConstants;
 import com.sighs.sophisticatedsorter.Config;
+import com.sighs.sophisticatedsorter.SophisticatedSorter;
 import com.sighs.sophisticatedsorter.registry.ModKeybindings;
 import com.sighs.sophisticatedsorter.utils.ClientUtils;
-import com.sighs.sophisticatedsorter.SophisticatedSorter;
+import com.sighs.sophisticatedsorter.utils.CoreUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = SophisticatedSorter.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = SophisticatedSorter.MODID, value = Dist.CLIENT)
 public class KeyInput {
     @SubscribeEvent
     public static void sort(InputEvent.MouseButton.Post event) {
