@@ -16,12 +16,25 @@ public class InventorySorterMixin {
             ),
             ordinal = 0,
             argsOnly = true)
-    private static int modifySlotLimit(int slotLimit,
-                                       ItemStackKey current) {
+    private static int modifySlotLimit(int slotLimit, ItemStackKey current) {
+        if (!isValid()) return slotLimit;
         // 物品的最大堆叠大小
         int maxStackSize = current.getStack().getMaxStackSize();
 
         // 返回槽位限制和物品最大堆叠大小的较小值
         return Math.min(slotLimit, maxStackSize);
+    }
+
+    private static boolean isValid() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : stackTrace) {
+            String className = element.getClassName();
+            String methodName = element.getMethodName();
+
+            if (className.contains("sophisticatedsorter")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

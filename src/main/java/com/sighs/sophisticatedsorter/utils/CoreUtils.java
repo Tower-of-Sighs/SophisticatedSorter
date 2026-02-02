@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
@@ -29,16 +30,6 @@ public class CoreUtils {
                     Collator.getInstance(Locale.CHINA)
             );
 
-    public static SortBy getSortBy() {
-        return ModConfig.INSTANCE.SORT_BY;
-    }
-
-    public static void toggleSortBy() {
-        ModConfig.INSTANCE.SORT_BY = ModConfig.INSTANCE.SORT_BY.next();
-        AutoConfig.getConfigHolder(ModConfig.class).save();
-    }
-
-
     public static Comparator<Map.Entry<ItemStackKey, Integer>> getComparator(SortBy sortBy, boolean zh) {
         Comparator<Map.Entry<ItemStackKey, Integer>> comparator = switch (sortBy) {
             case COUNT -> InventorySorter.BY_COUNT;
@@ -50,26 +41,11 @@ public class CoreUtils {
         return comparator;
     }
 
-    public static boolean canContainerSort(AbstractContainerMenu menu) {
-        if (menu instanceof InventoryMenu) return false;
-        boolean filter = ModConfig.INSTANCE.FILTER && menu.slots.size() <= 46;
-        return !filter;
-    }
-
-    public static void serverSort(AbstractContainerMenu menu) {
-        String target = "container";
-        if (!canContainerSort(menu)) target = "inventory";
-        NetworkHandler.sendToServer(NetworkHandler.SORT_PACKET_ID, new ServerSortPacket(getSortBy().getSerializedName(), target, ClientUtils.isZhLang()));
-    }
-    public static void serverTransfer(boolean transferToContainer, boolean filter) {
-        NetworkHandler.sendToServer(NetworkHandler.TRANSFER_PACKET_ID, new ServerTransferPacket(transferToContainer, filter));
-    }
-
     public static boolean isSlotInvalid(Slot slot) {
-        return !slot.mayPlace(ItemStack.EMPTY) || slot instanceof ResultSlot;
+        return !slot.mayPlace(new ItemStack(Items.BARRIER)) || slot instanceof ResultSlot;
     }
 
-    public static void sortContainer(ServerPlayer player, SortBy sortBy, boolean zh) {
+    public static void sortContainer(Player player, SortBy sortBy, boolean zh) {
         var menu = player.containerMenu;
         List<Integer> needSort = new ArrayList<>();
 
@@ -91,7 +67,7 @@ public class CoreUtils {
         }
     }
 
-    public static void sortInventory(ServerPlayer player, SortBy sortBy, boolean zh) {
+    public static void sortInventory(Player player, SortBy sortBy, boolean zh) {
         Inventory inventory = player.getInventory();
         var items = inventory.items;
         List<Integer> needSort = new ArrayList<>();
