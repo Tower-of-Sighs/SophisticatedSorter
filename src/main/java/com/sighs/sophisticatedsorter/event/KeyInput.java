@@ -23,7 +23,7 @@ public class KeyInput {
         if (action != InputConstants.PRESS) {
             return;
         }
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen) {
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
             if (ModKeybindings.matchesMouse(ModKeybindings.SORT_KEY, button)) {
                 ClientUtils.serverSort();
             }
@@ -35,7 +35,7 @@ public class KeyInput {
             return;
         }
         Screen screen = Minecraft.getInstance().screen;
-        if (screen instanceof AbstractContainerScreen<?> screen) {
+        if (screen instanceof AbstractContainerScreen<?>) {
             if (ModKeybindings.SORT_KEY.matches(key, scancode)) {
                 ClientUtils.serverSort();
             }
