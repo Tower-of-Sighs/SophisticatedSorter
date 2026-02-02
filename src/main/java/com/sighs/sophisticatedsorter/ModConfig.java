@@ -18,10 +18,16 @@ public class ModConfig implements ConfigData {
     public SortBy SORT_BY = SortBy.NAME;
 
     @ConfigEntry.Gui.Tooltip
-    public boolean FILTER = true;
+    public boolean FILTER1 = true;
+
+    @ConfigEntry.Gui.Tooltip
+    public boolean FILTER2 = true;
 
     @ConfigEntry.Gui.Tooltip
     public List<String> BLACK_LIST = List.of();
+
+    @ConfigEntry.Gui.Tooltip
+    public boolean PINYIN = true;
 
     public static void register() {
         AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);

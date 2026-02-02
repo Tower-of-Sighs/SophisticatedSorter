@@ -25,7 +25,7 @@ public class KeyInput {
         }
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
             if (ModKeybindings.matchesMouse(ModKeybindings.SORT_KEY, button)) {
-                CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
+                ClientUtils.serverSort();
             }
         }
     }
@@ -37,7 +37,7 @@ public class KeyInput {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof AbstractContainerScreen<?>) {
             if (ModKeybindings.SORT_KEY.matches(key, scancode)) {
-                CoreUtils.serverSort(Minecraft.getInstance().player.containerMenu);
+                ClientUtils.serverSort();
             }
             if (ModKeybindings.DISABLE_KEY.matches(key, scancode)) {
                 try {
