@@ -1,9 +1,11 @@
 package com.sighs.sophisticatedsorter.mixin;
 
+import com.sighs.sophisticatedsorter.utils.CoreUtils;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(value = InventorySorter.class, remap = false)
 public class InventorySorterMixin {
@@ -17,24 +19,11 @@ public class InventorySorterMixin {
             ordinal = 0,
             argsOnly = true)
     private static int modifySlotLimit(int slotLimit, ItemStackKey current) {
-        if (!isValid()) return slotLimit;
-        // 物品的最大堆叠大小
-        int maxStackSize = current.getStack().getMaxStackSize();
-
-        // 返回槽位限制和物品最大堆叠大小的较小值
-        return Math.min(slotLimit, maxStackSize);
-    }
-
-    private static boolean isValid() {
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        for (StackTraceElement element : stackTrace) {
-            String className = element.getClassName();
-            String methodName = element.getMethodName();
-
-            if (className.contains("sophisticatedsorter")) {
-                return true;
-            }
+        if (!CoreUtils.shouldLimitToItemMaxStackSize()) {
+            return slotLimit;
         }
-        return false;
+
+        int maxStackSize = current.getStack().getMaxStackSize();
+        return Math.min(slotLimit, maxStackSize);
     }
 }
