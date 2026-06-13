@@ -22,6 +22,8 @@ import java.text.Collator;
 import java.util.*;
 
 public class CoreUtils {
+    private static final ThreadLocal<Boolean> LIMIT_TO_ITEM_MAX_STACK_SIZE = ThreadLocal.withInitial(() -> false);
+
     public static final Comparator<Map.Entry<ItemStackKey, Integer>> BY_PINYIN =
             Comparator.comparing((Map.Entry<ItemStackKey, Integer> o) ->
                             o.getKey().getStack().getHoverName().getString(),
@@ -44,6 +46,10 @@ public class CoreUtils {
         return !slot.mayPlace(ItemStack.EMPTY) || slot instanceof ResultSlot;
     }
 
+    public static boolean shouldLimitToItemMaxStackSize() {
+        return LIMIT_TO_ITEM_MAX_STACK_SIZE.get();
+    }
+
     public static void sortContainer(ServerPlayer player, SortBy sortBy, boolean zh) {
         var menu = player.containerMenu;
         List<Integer> needSort = new ArrayList<>();
@@ -59,7 +65,12 @@ public class CoreUtils {
             handler.setStackInSlot(i, menu.getSlot(needSort.get(i)).getItem());
         }
 
-        InventorySorter.sortHandler(handler, CoreUtils.getComparator(sortBy, zh), new HashSet<>());
+        LIMIT_TO_ITEM_MAX_STACK_SIZE.set(true);
+        try {
+            InventorySorter.sortHandler(handler, CoreUtils.getComparator(sortBy, zh), new HashSet<>());
+        } finally {
+            LIMIT_TO_ITEM_MAX_STACK_SIZE.remove();
+        }
 
         for (int i = 0; i < needSort.size(); i++) {
             menu.getSlot(needSort.get(i)).set(handler.getStackInSlot(i));
@@ -78,7 +89,12 @@ public class CoreUtils {
             handler.setStackInSlot(i, items.get(needSort.get(i)));
         }
 
-        InventorySorter.sortHandler(handler, CoreUtils.getComparator(sortBy, zh), new HashSet<>());
+        LIMIT_TO_ITEM_MAX_STACK_SIZE.set(true);
+        try {
+            InventorySorter.sortHandler(handler, CoreUtils.getComparator(sortBy, zh), new HashSet<>());
+        } finally {
+            LIMIT_TO_ITEM_MAX_STACK_SIZE.remove();
+        }
 
         for (int i = 0; i < needSort.size(); i++) {
             inventory.setItem(needSort.get(i), handler.getStackInSlot(i));

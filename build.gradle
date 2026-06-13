@@ -125,8 +125,8 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
-    implementation "curse.maven:sophisticated-core-618298:7358894"
-    implementation "curse.maven:sophisticated-backpacks-422301:7358896"
+    implementation "curse.maven:sophisticated-core-618298:8238703"
+    implementation "curse.maven:sophisticated-backpacks-422301:8238750"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
