@@ -1,0 +1,91 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.fabricmc.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.fabricmc:fabric-loom:1.10.5'
+        classpath 'me.modmuss50:mod-publish-plugin:2.1.1'
+    }
+}
+
+apply plugin: 'fabric-loom'
+apply plugin: 'java'
+apply plugin: 'me.modmuss50.mod-publish-plugin'
+
+def properties = new Properties()
+file('../../gradle.properties').withInputStream { properties.load(it) }
+file('gradle.properties').withInputStream { properties.load(it) }
+properties.each { key, value -> ext.set(key.toString(), value.toString()) }
+
+group = mod_group_id
+version = mod_version
+
+base {
+    archivesName = "${mod_name}-fabric-1.21.1"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/sophisticatedsorter.accesswidener')
+}
+
+sourceSets.main.output.dir(
+        project(':common').layout.buildDirectory.dir('classes/java/main'),
+        builtBy: ':common:classes'
+)
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://maven.fabricmc.net/'
+        content { includeGroupByRegex 'net\\.fabricmc(\\..*)?' }
+    }
+    maven {
+        url = 'https://maven.shedaniel.me/'
+        content { includeGroupByRegex 'me\\.shedaniel(\\..*)?' }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${fabric_minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}"
+    implementation "com.electronwill.night-config:core:3.8.3"
+    implementation "com.electronwill.night-config:toml:3.8.3"
+    include "com.electronwill.night-config:core:3.8.3"
+    include "com.electronwill.night-config:toml:3.8.3"
+    modImplementation fileTree(dir: 'libs', include: ['*.jar', 'META-INF/jars/*.jar'])
+    implementation project(':common')
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    def replaceProperties = [
+            minecraft_version: fabric_minecraft_version,
+            fabric_loader_version: fabric_loader_version,
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_license: mod_license,
+            mod_version: mod_version,
+            mod_authors: mod_authors,
+            mod_description: mod_description
+    ]
+    inputs.properties replaceProperties
+    filesMatching('fabric.mod.json') {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+ext.skipLocalImplementationDependencies = true
+apply from: file('../../gradle/target-conventions/publish.gradle')

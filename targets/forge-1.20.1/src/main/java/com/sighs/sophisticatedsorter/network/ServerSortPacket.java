@@ -1,0 +1,41 @@
+package com.sighs.sophisticatedsorter.network;
+
+import com.sighs.sophisticatedsorter.common.SortRequest;
+import com.sighs.sophisticatedsorter.platform.ForgeSorterCommands;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
+
+public class ServerSortPacket {
+    private final String sortBy;
+    private final String target;
+    private final boolean zh;
+
+    public ServerSortPacket(String sortBy, String target, boolean zh) {
+        this.sortBy = sortBy;
+        this.target = target;
+        this.zh = zh;
+    }
+
+    public static void encode(ServerSortPacket msg, FriendlyByteBuf buffer) {
+        buffer.writeUtf(msg.sortBy);
+        buffer.writeUtf(msg.target);
+        buffer.writeBoolean(msg.zh);
+    }
+
+    public static ServerSortPacket decode(FriendlyByteBuf buffer) {
+        return new ServerSortPacket(buffer.readUtf(), buffer.readUtf(), buffer.readBoolean());
+    }
+
+    public static void handle(ServerSortPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null) {
+                ForgeSorterCommands.INSTANCE.sort(player, SortRequest.fromWire(msg.sortBy, msg.target, msg.zh));
+            }
+        });
+        ctx.get().setPacketHandled(true);
+    }
+}
