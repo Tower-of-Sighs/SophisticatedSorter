@@ -19,7 +19,7 @@
     "java": ">=21",
     "fabric": "*",
     "cloth-config2": "*",
-    "sophisticatedcore": "*"
+    "sophisticatedcore": "${sophisticated_core_version_range}"
   }
 }
 

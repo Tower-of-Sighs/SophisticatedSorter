@@ -22,7 +22,7 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "sophisticatedcore"
 type = "required"
-versionRange = "[0,)"
+versionRange = "${sophisticated_core_version_range}"
 ordering = "AFTER"
 side = "BOTH"
 

@@ -83,6 +83,7 @@ public final class CoreUtils {
         for (int index = 0; index < sortableSlots.size(); index++) {
             menu.getSlot(sortableSlots.get(index)).set(handler.getStackInSlot(index));
         }
+        menu.broadcastChanges();
     }
 
     private static void sortInventory(Player player, SortBy sortBy, boolean zh) {
@@ -96,6 +97,7 @@ public final class CoreUtils {
         for (int index = 0; index < sortableSlots.size(); index++) {
             inventory.setItem(sortableSlots.get(index), handler.getStackInSlot(index));
         }
+        player.inventoryMenu.broadcastChanges();
     }
 
     private static void sortHandler(ItemStackHandler handler, SortBy sortBy, boolean zh) {
@@ -126,5 +128,6 @@ public final class CoreUtils {
                 menu.quickMoveStack(player, slot.index);
             }
         }
+        menu.broadcastChanges();
     }
 }

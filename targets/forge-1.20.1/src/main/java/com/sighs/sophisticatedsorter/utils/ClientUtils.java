@@ -118,7 +118,6 @@ public class ClientUtils {
     public static void serverSort() {
         String target = "container";
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen) {
-            if (screen instanceof StorageScreenBase) return;
             if (!isValidScreen()) target = "inventory";
             NetworkHandler.CHANNEL.sendToServer(new ServerSortPacket(getSortBy().getSerializedName(), target, ClientUtils.isZhLang()));
 //            Player player = Minecraft.getInstance().player;

@@ -3,10 +3,13 @@ buildscript {
         gradlePluginPortal()
         maven { url = 'https://maven.fabricmc.net/' }
         mavenCentral()
+        maven { url = 'https://api.modrinth.com/maven' }
     }
+    configurations { sophisticatedCoreArtifact }
     dependencies {
         classpath 'net.fabricmc:fabric-loom:1.10.5'
         classpath 'me.modmuss50:mod-publish-plugin:2.1.1'
+        sophisticatedCoreArtifact 'maven.modrinth:9jxwkYQL:BP3CQI2v'
     }
 }
 
@@ -50,15 +53,26 @@ repositories {
         content { includeGroupByRegex 'me\\.shedaniel(\\..*)?' }
     }
     maven {
-        url = 'https://mvn.devos.one/releases/'
-        content { includeGroup 'io.github.fabricators_of_create.Porting-Lib' }
+        url = 'https://api.modrinth.com/maven'
     }
-    maven {
-        name = 'Curse Maven'
-        url = 'https://www.cursemaven.com'
-        content {
-            includeGroup 'curse.maven'
-        }
+}
+
+def sophisticatedCoreCoordinate = 'maven.modrinth:9jxwkYQL:BP3CQI2v'
+def sophisticatedCoreArtifact = buildscript.configurations.sophisticatedCoreArtifact
+def extractedCoreLibraries = layout.buildDirectory.dir('generated/sophisticatedcore-libs')
+def extractSophisticatedCoreLibraries = tasks.register('extractSophisticatedCoreLibraries', Sync) {
+    from { zipTree(sophisticatedCoreArtifact.singleFile) }
+    include 'META-INF/jars/*.jar'
+    into extractedCoreLibraries
+}
+def extractedTransferLibrary = extractedCoreLibraries.map {
+    it.file('META-INF/jars/transfer-2.3.2+1.20.1.jar')
+}
+if (!extractedTransferLibrary.get().asFile.exists()) {
+    copy {
+        from zipTree(sophisticatedCoreArtifact.singleFile)
+        include 'META-INF/jars/*.jar'
+        into extractedCoreLibraries
     }
 }
 
@@ -68,9 +82,10 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
     modImplementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}"
-    modImplementation "io.github.fabricators_of_create.Porting-Lib:transfer:${port_lib_version}+${fabric_minecraft_version}"
-    modImplementation "curse.maven:sophisticated-core-unofficial-fabric-port-979317:7092593"
-    modImplementation "curse.maven:sophisticated-backpacks-unofficial-fabric-port-979322:7147929"
+    modImplementation sophisticatedCoreCoordinate
+    modImplementation 'maven.modrinth:ouNrBQtq:Jk6o7s4h'
+    modImplementation 'maven.modrinth:ohNO6lps:HvR3IdRE'
+    modImplementation files(extractedTransferLibrary).builtBy(extractSophisticatedCoreLibraries)
     implementation project(':common')
 }
 
@@ -83,7 +98,8 @@ tasks.named('processResources', ProcessResources).configure {
             mod_license: mod_license,
             mod_version: mod_version,
             mod_authors: mod_authors,
-            mod_description: mod_description
+            mod_description: mod_description,
+            sophisticated_core_version_range: sophisticated_core_version_range
     ]
     inputs.properties replaceProperties
     filesMatching('fabric.mod.json') {
@@ -92,6 +108,7 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 tasks.withType(JavaCompile).configureEach {
+    dependsOn extractSophisticatedCoreLibraries
     options.encoding = 'UTF-8'
     options.release = 17
 }
