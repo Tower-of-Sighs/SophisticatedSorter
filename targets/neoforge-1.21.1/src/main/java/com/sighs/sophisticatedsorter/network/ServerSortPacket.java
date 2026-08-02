@@ -12,6 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record ServerSortPacket(String sortBy, String target, boolean zh) implements CustomPacketPayload {
+    public ServerSortPacket(SortRequest request) {
+        this(request.criterion().wireName(), request.target().wireName(), request.pinyinOrder());
+    }
+
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(SophisticatedSorter.MODID, "server_sort");
     public static final CustomPacketPayload.Type<ServerSortPacket> TYPE = new Type<>(ID);
 

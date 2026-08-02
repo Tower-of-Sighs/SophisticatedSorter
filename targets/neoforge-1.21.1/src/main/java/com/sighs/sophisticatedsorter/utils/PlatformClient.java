@@ -1,0 +1,58 @@
+package com.sighs.sophisticatedsorter.utils;
+
+import com.sighs.sophisticatedsorter.Config;
+import com.sighs.sophisticatedsorter.common.SortRequest;
+import com.sighs.sophisticatedsorter.common.TransferRequest;
+import com.sighs.sophisticatedsorter.network.ServerSortPacket;
+import com.sighs.sophisticatedsorter.network.ServerTransferPacket;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
+
+/** NeoForge configuration holders and payload transport. */
+public final class PlatformClient implements ClientPlatform {
+    public static final ClientPlatform INSTANCE = new PlatformClient();
+
+    private PlatformClient() {
+    }
+
+    @Override
+    public boolean isScreenDisabled(String screenId) {
+        return Config.BLACKLIST.get().contains(screenId);
+    }
+
+    @Override
+    public boolean isFilter1Enabled() {
+        return Config.FILTER1.get();
+    }
+
+    @Override
+    public boolean isFilter2Enabled() {
+        return Config.FILTER2.get();
+    }
+
+    @Override
+    public boolean isPinyinEnabled() {
+        return Config.PINYIN.get();
+    }
+
+    @Override
+    public SortBy getSortBy() {
+        return SortBy.fromName(Config.SORT_BY.get());
+    }
+
+    @Override
+    public void toggleSortBy() {
+        Config.SORT_BY.set(getSortBy().next().getSerializedName());
+        Config.SORT_BY.save();
+    }
+
+    @Override
+    public void sendSort(SortRequest request) {
+        PacketDistributor.sendToServer(new ServerSortPacket(request));
+    }
+
+    @Override
+    public void sendTransfer(TransferRequest request) {
+        PacketDistributor.sendToServer(new ServerTransferPacket(request));
+    }
+}

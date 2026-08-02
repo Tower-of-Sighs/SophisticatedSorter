@@ -16,6 +16,10 @@ public class ServerSortPacket implements Packet {
         this.zh = zh;
     }
 
+    public ServerSortPacket(SortRequest request) {
+        this(request.criterion().wireName(), request.target().wireName(), request.pinyinOrder());
+    }
+
     @Override
     public void encode(FriendlyByteBuf buf) {
         buf.writeUtf(sortBy);

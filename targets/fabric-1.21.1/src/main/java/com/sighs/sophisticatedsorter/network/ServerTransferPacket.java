@@ -12,6 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 
 /** Fabric 1.21.1 C2S transfer payload. */
 public record ServerTransferPacket(boolean toContainer, boolean filterByDestination) implements CustomPacketPayload {
+    public ServerTransferPacket(TransferRequest request) {
+        this(request.toContainer(), request.filterByDestination());
+    }
+
     public static final Type<ServerTransferPacket> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(SophisticatedSorter.MODID, "server_transfer"));
     public static final StreamCodec<ByteBuf, ServerTransferPacket> STREAM_CODEC = StreamCodec.composite(

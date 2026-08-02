@@ -30,6 +30,8 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import com.sighs.sophisticatedsorter.utils.CoreUtils;
+import com.sighs.sophisticatedsorter.utils.PlatformSortBackend;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
@@ -41,6 +43,7 @@ public class SophisticatedSorter {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public SophisticatedSorter(IEventBus modEventBus, ModContainer modContainer) {
+        CoreUtils.installPlatform(PlatformSortBackend.INSTANCE);
         modContainer.registerConfig(ModConfig.Type.CLIENT, Config.SPEC);
     }
 }

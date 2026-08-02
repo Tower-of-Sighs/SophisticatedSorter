@@ -14,6 +14,10 @@ public class ServerTransferPacket implements Packet{
         this.filter = filter;
     }
 
+    public ServerTransferPacket(TransferRequest request) {
+        this(request.toContainer(), request.filterByDestination());
+    }
+
     @Override
     public void encode(FriendlyByteBuf buf) {
         buf.writeBoolean(transferToContainer);

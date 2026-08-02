@@ -12,6 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record ServerTransferPacket(boolean transferToContainer, boolean filter) implements CustomPacketPayload {
+    public ServerTransferPacket(TransferRequest request) {
+        this(request.toContainer(), request.filterByDestination());
+    }
+
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(SophisticatedSorter.MODID, "server_transfer");
     public static final Type<ServerTransferPacket> TYPE = new Type<>(ID);
 

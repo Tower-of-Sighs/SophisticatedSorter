@@ -37,10 +37,9 @@ loom {
     accessWidenerPath = file('src/main/resources/sophisticatedsorter.accesswidener')
 }
 
-sourceSets.main.output.dir(
-        project(':common').layout.buildDirectory.dir('classes/java/main'),
-        builtBy: ':common:classes'
-)
+sourceSets.main.java.srcDir(project(':common').file('src/main/java'))
+sourceSets.main.java.srcDir(project(':common').file('src/minecraft/java'))
+sourceSets.main.java.srcDir(project(':common').file('src/fabric/java'))
 
 repositories {
     mavenCentral()
@@ -62,6 +61,11 @@ def extractSophisticatedCoreLibraries = tasks.register('extractSophisticatedCore
     from { zipTree(sophisticatedCoreArtifact.singleFile) }
     include 'META-INF/jars/*.jar'
     into extractedCoreLibraries
+}
+def extractedCoreLibraryJars = files {
+    fileTree(extractedCoreLibraries.get().dir('META-INF/jars').asFile) {
+        include '*.jar'
+    }.files
 }
 def extractedTransferLibrary = extractedCoreLibraries.map {
     it.file('META-INF/jars/transfer-3.1.0-beta.47+1.21.1.jar')
@@ -88,7 +92,7 @@ dependencies {
     modImplementation 'maven.modrinth:ouNrBQtq:nHhuPdda'
     modImplementation 'maven.modrinth:ohNO6lps:N5qzq0XV'
     modImplementation files(extractedTransferLibrary).builtBy(extractSophisticatedCoreLibraries)
-    implementation project(':common')
+    modRuntimeOnly extractedCoreLibraryJars.builtBy(extractSophisticatedCoreLibraries)
 }
 
 tasks.named('processResources', ProcessResources).configure {

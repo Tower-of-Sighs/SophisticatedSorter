@@ -57,6 +57,8 @@ minecraft {
 }
 
 sourceSets.main.java.srcDir(project(':common').file('src/main/java'))
+sourceSets.main.java.srcDir(project(':common').file('src/minecraft/java'))
+sourceSets.main.java.srcDir(project(':common').file('src/itemstack/java'))
 
 repositories {
     mavenCentral()

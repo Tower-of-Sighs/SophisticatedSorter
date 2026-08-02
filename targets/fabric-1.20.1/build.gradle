@@ -37,10 +37,13 @@ loom {
     accessWidenerPath = file('src/main/resources/sophisticatedsorter.accesswidener')
 }
 
-sourceSets.main.output.dir(
-        project(':common').layout.buildDirectory.dir('classes/java/main'),
-        builtBy: ':common:classes'
-)
+sourceSets.main.java.srcDir(project(':common').file('src/main/java'))
+sourceSets.main.java.srcDir(project(':common').file('src/minecraft/java'))
+sourceSets.main.java.srcDir(project(':common').file('src/fabric/java'))
+
+configurations {
+    portingLibArtifact
+}
 
 repositories {
     mavenCentral()
@@ -65,6 +68,11 @@ def extractSophisticatedCoreLibraries = tasks.register('extractSophisticatedCore
     include 'META-INF/jars/*.jar'
     into extractedCoreLibraries
 }
+def extractedCoreLibraryJars = files {
+    fileTree(extractedCoreLibraries.get().dir('META-INF/jars').asFile) {
+        include '*.jar'
+    }.files
+}
 def extractedTransferLibrary = extractedCoreLibraries.map {
     it.file('META-INF/jars/transfer-2.3.2+1.20.1.jar')
 }
@@ -74,6 +82,25 @@ if (!extractedTransferLibrary.get().asFile.exists()) {
         include 'META-INF/jars/*.jar'
         into extractedCoreLibraries
     }
+}
+def extractedPortingLibLibraries = layout.buildDirectory.dir('generated/porting-lib-libs')
+// Core 1.20.1 embeds only part of Porting Lib; add the missing modules from its Modrinth artifact.
+def extractPortingLibLibraries = tasks.register('extractPortingLibLibraries', Sync) {
+    from { zipTree(configurations.portingLibArtifact.singleFile) }
+    include 'META-INF/jars/*.jar'
+    exclude 'META-INF/jars/porting_lib_extensions-*.jar'
+    exclude 'META-INF/jars/porting_lib_fluids-*.jar'
+    exclude 'META-INF/jars/porting_lib_loot-*.jar'
+    exclude 'META-INF/jars/porting_lib_model_loader-*.jar'
+    exclude 'META-INF/jars/porting_lib_networking-*.jar'
+    exclude 'META-INF/jars/porting_lib_tool_actions-*.jar'
+    exclude 'META-INF/jars/porting_lib_transfer-*.jar'
+    into extractedPortingLibLibraries
+}
+def extractedPortingLibLibraryJars = files {
+    fileTree(extractedPortingLibLibraries.get().dir('META-INF/jars').asFile) {
+        include '*.jar'
+    }.files
 }
 
 dependencies {
@@ -85,8 +112,10 @@ dependencies {
     modImplementation sophisticatedCoreCoordinate
     modImplementation 'maven.modrinth:ouNrBQtq:Jk6o7s4h'
     modImplementation 'maven.modrinth:ohNO6lps:HvR3IdRE'
+    portingLibArtifact 'maven.modrinth:tEJPA4Ty:1pOFZAmz'
     modImplementation files(extractedTransferLibrary).builtBy(extractSophisticatedCoreLibraries)
-    implementation project(':common')
+    modRuntimeOnly extractedCoreLibraryJars.builtBy(extractSophisticatedCoreLibraries)
+    modRuntimeOnly extractedPortingLibLibraryJars.builtBy(extractPortingLibLibraries)
 }
 
 tasks.named('processResources', ProcessResources).configure {
@@ -109,6 +138,7 @@ tasks.named('processResources', ProcessResources).configure {
 
 tasks.withType(JavaCompile).configureEach {
     dependsOn extractSophisticatedCoreLibraries
+    dependsOn extractPortingLibLibraries
     options.encoding = 'UTF-8'
     options.release = 17
 }

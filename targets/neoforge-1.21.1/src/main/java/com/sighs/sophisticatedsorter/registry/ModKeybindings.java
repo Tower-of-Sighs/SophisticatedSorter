@@ -2,6 +2,8 @@ package com.sighs.sophisticatedsorter.registry;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.sighs.sophisticatedsorter.SophisticatedSorter;
+import com.sighs.sophisticatedsorter.utils.ClientUtils;
+import com.sighs.sophisticatedsorter.utils.PlatformClient;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -13,6 +15,9 @@ import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(value = Dist.CLIENT, modid = SophisticatedSorter.MODID)
 public class ModKeybindings {
+    static {
+        ClientUtils.installPlatform(PlatformClient.INSTANCE);
+    }
     public static final KeyMapping SORT_KEY = new KeyMapping("key.sophisticatedsorter.sort",
             KeyConflictContext.GUI,
             KeyModifier.NONE,

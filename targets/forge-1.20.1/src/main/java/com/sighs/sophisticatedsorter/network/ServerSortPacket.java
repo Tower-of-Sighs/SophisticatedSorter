@@ -19,6 +19,10 @@ public class ServerSortPacket {
         this.zh = zh;
     }
 
+    public ServerSortPacket(SortRequest request) {
+        this(request.criterion().wireName(), request.target().wireName(), request.pinyinOrder());
+    }
+
     public static void encode(ServerSortPacket msg, FriendlyByteBuf buffer) {
         buffer.writeUtf(msg.sortBy);
         buffer.writeUtf(msg.target);

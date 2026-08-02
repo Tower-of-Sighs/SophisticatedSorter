@@ -17,6 +17,10 @@ public class ServerTransferPacket {
         this.filter = filter;
     }
 
+    public ServerTransferPacket(TransferRequest request) {
+        this(request.toContainer(), request.filterByDestination());
+    }
+
     public static void encode(ServerTransferPacket msg, FriendlyByteBuf buffer) {
         buffer.writeBoolean(msg.transferToContainer);
         buffer.writeBoolean(msg.filter);

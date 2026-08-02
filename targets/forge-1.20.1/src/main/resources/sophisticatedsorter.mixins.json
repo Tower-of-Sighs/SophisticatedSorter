@@ -4,10 +4,12 @@
   "package": "com.sighs.sophisticatedsorter.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "AbstractContainerMenuAccessor",
     "InventorySorterMixin",
     "SearchBoxMixin",
     "SettingsHandlerMixin",
-    "StorageContainerMenuBaseMixin"
+    "StorageContainerMenuBaseMixin",
+    "StorageContainerMenuBaseNoSortMixin"
   ],
   "client": [
     "AbstractContainerScreenMixin",

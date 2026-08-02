@@ -12,6 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 
 /** Fabric 1.21.1 C2S sort payload. */
 public record ServerSortPacket(String sortBy, String target, boolean pinyinOrder) implements CustomPacketPayload {
+    public ServerSortPacket(SortRequest request) {
+        this(request.criterion().wireName(), request.target().wireName(), request.pinyinOrder());
+    }
+
     public static final Type<ServerSortPacket> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(SophisticatedSorter.MODID, "server_sort"));
     public static final StreamCodec<ByteBuf, ServerSortPacket> STREAM_CODEC = StreamCodec.composite(

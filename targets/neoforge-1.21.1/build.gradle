@@ -20,6 +20,10 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
+sourceSets.main.java.srcDir(project(':common').file('src/main/java'))
+sourceSets.main.java.srcDir(project(':common').file('src/minecraft/java'))
+sourceSets.main.java.srcDir(project(':common').file('src/itemstack/java'))
+
 neoForge {
     version = neoforge_121_version
 
@@ -41,7 +45,6 @@ neoForge {
 }
 
 dependencies {
-    implementation project(':common')
     implementation 'maven.modrinth:nmoqTijg:Yx6FiECq'
     implementation 'maven.modrinth:TyCTlI4b:FHd2LYlQ'
 }
@@ -68,10 +71,6 @@ tasks.named('processResources', ProcessResources).configure {
     filesMatching('META-INF/neoforge.mods.toml') {
         expand replaceProperties + [project: project]
     }
-}
-
-tasks.named('jar', Jar).configure {
-    from project(':common').sourceSets.main.output
 }
 
 tasks.withType(JavaCompile).configureEach {
