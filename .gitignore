@@ -4,4 +4,6 @@ run/
 out/
 *.iml
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
+!targets/*/gradle/wrapper/gradle-wrapper.jar
 .idea/
