@@ -19,8 +19,8 @@ def publishLoader = project.projectDir.name.tokenize('-').first()
 def publishMinecraftVersion = [
         forge    : providers.gradleProperty('forge_minecraft_version'),
         fabric   : providers.gradleProperty('fabric_minecraft_version'),
-        neoforge : providers.gradleProperty('neoforge_121_minecraft_version')
-                .orElse(providers.gradleProperty('neoforge_261_minecraft_version'))
+        neoforge : providers.gradleProperty('neoforge_261_minecraft_version')
+                .orElse(providers.gradleProperty('neoforge_121_minecraft_version'))
 ][publishLoader]
 
 def publishFile = tasks.findByName('remapJar') != null ?

@@ -2,7 +2,8 @@ def targetBuilds = [
         'forge-1.20.1'    : [directory: 'targets/forge-1.20.1', task: 'buildForge1201'],
         'fabric-1.20.1'   : [directory: 'targets/fabric-1.20.1', task: 'buildFabric1201'],
         'fabric-1.21.1'   : [directory: 'targets/fabric-1.21.1', task: 'buildFabric1211'],
-        'neoforge-1.21.1' : [directory: 'targets/neoforge-1.21.1', task: 'buildNeoForge1211']
+        'neoforge-1.21.1' : [directory: 'targets/neoforge-1.21.1', task: 'buildNeoForge1211'],
+        'neoforge-26.1'   : [directory: 'targets/neoforge-26.1', task: 'buildNeoForge261', aggregate: false]
 ]
 
 def selectedTarget = providers.gradleProperty('target').orNull
@@ -15,14 +16,14 @@ targetBuilds.each { targetName, targetBuild ->
     tasks.register(targetBuild.task, Exec) {
         group = 'build'
         description = "Builds ${targetName} in its independent Gradle project."
-        workingDir rootDir
-        commandLine 'cmd', '/c', 'gradlew.bat', '-p', targetBuild.directory.replace('/', '\\'), 'build', '--console', 'plain', '--no-daemon'
+        workingDir file(targetBuild.directory)
+        commandLine 'cmd', '/c', 'gradlew.bat', 'build', '--console', 'plain', '--no-daemon'
     }
 }
 
 tasks.register('build') {
     group = 'build'
-    description = 'Builds common and an optionally selected JDK 21 target.'
+    description = 'Builds common and an optionally selected target.'
     dependsOn ':common:build'
 
     if (selectedTarget != null) {
@@ -30,7 +31,7 @@ tasks.register('build') {
     }
 
     if (buildAllTargets.get()) {
-        targetBuilds.values().each { targetBuild ->
+        targetBuilds.values().findAll { targetBuild -> targetBuild.getOrDefault('aggregate', true) }.each { targetBuild ->
             dependsOn tasks.named(targetBuild.task)
         }
     }

@@ -12,6 +12,9 @@ on:
       - 'scripts/discover-targets.ps1'
       - '.github/workflows/verify-common.yml'
       - 'targets/**/ci.properties'
+      - 'targets/**/build.gradle'
+      - 'targets/**/gradle.properties'
+      - 'targets/**/src/**'
       - 'targets/**/gradlew*'
       - 'targets/**/gradle/wrapper/**'
   pull_request:
@@ -25,6 +28,9 @@ on:
       - 'scripts/discover-targets.ps1'
       - '.github/workflows/verify-common.yml'
       - 'targets/**/ci.properties'
+      - 'targets/**/build.gradle'
+      - 'targets/**/gradle.properties'
+      - 'targets/**/src/**'
       - 'targets/**/gradlew*'
       - 'targets/**/gradle/wrapper/**'
   workflow_dispatch:

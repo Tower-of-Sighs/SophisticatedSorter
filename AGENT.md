@@ -57,7 +57,7 @@ cd targets\forge-1.20.1
 | `neoforge-1.21.1` | JDK 21 |
 | `neoforge-26.1` | JDK 25 |
 
-根项目的 `-PallTargets=true build` 只覆盖前三个 JDK 21 target，不能替代 NeoForge 26.1 的独立构建。
+根项目的 `-PallTargets=true build` 只覆盖 JDK 21 target，不能替代 26.1 target 的独立构建。
 
 ### 发布
 

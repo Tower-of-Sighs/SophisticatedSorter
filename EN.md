@@ -4,6 +4,16 @@ Allows the built-in sorting functionality from Sophisticated Core to work on the
 
 This mod does not try to invent a brand-new sorting system. It simply extends the existing Sophisticated Core sorting entry points to more screens.
 
+### Supported Targets
+
+| Loader | Minecraft | Java |
+| --- | --- | --- |
+| Forge | 1.20.1 | 21 |
+| Fabric | 1.20.1 | 21 |
+| Fabric | 1.21.1 | 21 |
+| NeoForge | 1.21.1 | 21 |
+| NeoForge | 26.1 | 25 |
+
 ### Main Features
 
 #### Sorting Button Extension

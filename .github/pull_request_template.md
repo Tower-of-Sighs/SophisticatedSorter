@@ -40,4 +40,3 @@ Runtime verification:
 ## Release Notes
 
 State which loader/version jars should include this change and any known limitation.
-
