@@ -1,6 +1,7 @@
 package com.sighs.sophisticatedsorter.utils;
 
 import com.sighs.sophisticatedsorter.api.IStorageScreenBase;
+import com.sighs.sophisticatedsorter.common.ButtonPositions;
 import com.sighs.sophisticatedsorter.common.SortCriterion;
 import com.sighs.sophisticatedsorter.common.SortRequestFactory;
 import com.sighs.sophisticatedsorter.common.SortRequest;
@@ -157,6 +158,18 @@ public final class ClientUtils {
 
     public static void toggleSortBy() {
         platform().toggleSortBy();
+    }
+
+    public static String disableKeyDisplayName() {
+        return platform().getDisableKeyDisplayName();
+    }
+
+    public static ButtonPositions getButtonPositions(String screenType) {
+        return platform().getButtonPositions(screenType);
+    }
+
+    public static void saveButtonPositions(String screenType, ButtonPositions positions) {
+        platform().saveButtonPositions(screenType, positions);
     }
 
     private static ClientPlatform platform() {

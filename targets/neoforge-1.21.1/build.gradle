@@ -45,13 +45,14 @@ neoForge {
 }
 
 dependencies {
-    implementation 'maven.modrinth:nmoqTijg:Yx6FiECq'
-    implementation 'maven.modrinth:TyCTlI4b:FHd2LYlQ'
+    implementation 'curse.maven:sophisticated-core-618298:8705083'
+    implementation 'curse.maven:sophisticated-backpacks-422301:8687841'
 }
 
 repositories {
+    maven { url = 'file:///D:/work/SophisticatedSorter/.local-curse-repo' }
     mavenCentral()
-    maven { url = 'https://api.modrinth.com/maven' }
+    maven { url = 'https://cursemaven.com' }
 }
 
 tasks.named('processResources', ProcessResources).configure {

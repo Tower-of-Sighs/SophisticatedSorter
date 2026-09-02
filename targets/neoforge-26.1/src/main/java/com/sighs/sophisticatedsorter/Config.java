@@ -2,6 +2,7 @@ package com.sighs.sophisticatedsorter;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
@@ -15,6 +16,7 @@ public class Config {
     public static ModConfigSpec.ConfigValue<Boolean> FILTER2;
     public static ModConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
     public static ModConfigSpec.ConfigValue<Boolean> PINYIN;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> BUTTON_POSITIONS;
 
     static {
         BUILDER.push("Setting");
@@ -38,6 +40,74 @@ public class Config {
                 .comment("是否启用默认拼音排序。")
                 .define("pinyin", true);
 
+        BUTTON_POSITIONS = BUILDER
+                .comment("Per-screen button offsets: screen class|sort X|sort Y|transfer X|transfer Y.")
+                .defineList("buttonPositions", List.of(), entry -> entry instanceof String);
+
         SPEC = BUILDER.build();
+    }
+
+    /**
+     * Returns the offsets saved for one concrete screen class. Invalid records are ignored and
+     * duplicate records use the last valid value, which makes hand-edited config files harmless.
+     */
+    public static ButtonPositions getButtonPositions(String screenType) {
+        ButtonPositions result = ButtonPositions.ZERO;
+        for (String record : BUTTON_POSITIONS.get()) {
+            ButtonPositions parsed = parseButtonPosition(record, screenType);
+            if (parsed != null) {
+                result = parsed;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Replaces the offsets for one screen class while preserving other screen classes' records.
+     * Invalid records and duplicate entries for the updated screen are removed on save.
+     */
+    public static void saveButtonPositions(String screenType, int sortX, int sortY,
+                                            int transferX, int transferY) {
+        List<String> records = new ArrayList<>();
+        for (String record : BUTTON_POSITIONS.get()) {
+            if (parseButtonPosition(record, null) == null) {
+                continue;
+            }
+            String[] fields = record.split("\\|", -1);
+            if (!fields[0].equals(screenType)) {
+                records.add(record);
+            }
+        }
+        records.add(formatButtonPosition(screenType, sortX, sortY, transferX, transferY));
+        BUTTON_POSITIONS.set(records);
+        BUTTON_POSITIONS.save();
+    }
+
+    private static ButtonPositions parseButtonPosition(String record, String screenType) {
+        if (record == null) {
+            return null;
+        }
+        String[] fields = record.split("\\|", -1);
+        if (fields.length != 5 || fields[0].isEmpty() || (screenType != null && !fields[0].equals(screenType))) {
+            return null;
+        }
+        try {
+            return new ButtonPositions(
+                    Integer.parseInt(fields[1]),
+                    Integer.parseInt(fields[2]),
+                    Integer.parseInt(fields[3]),
+                    Integer.parseInt(fields[4]));
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    private static String formatButtonPosition(String screenType, int sortX, int sortY,
+                                               int transferX, int transferY) {
+        return screenType + "|" + sortX + "|" + sortY + "|" + transferX + "|" + transferY;
+    }
+
+    public record ButtonPositions(int sortX, int sortY, int transferX, int transferY) {
+        private static final ButtonPositions ZERO = new ButtonPositions(0, 0, 0, 0);
     }
 }

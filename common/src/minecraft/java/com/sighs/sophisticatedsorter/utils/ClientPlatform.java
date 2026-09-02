@@ -1,5 +1,6 @@
 package com.sighs.sophisticatedsorter.utils;
 
+import com.sighs.sophisticatedsorter.common.ButtonPositions;
 import com.sighs.sophisticatedsorter.common.SortRequest;
 import com.sighs.sophisticatedsorter.common.TransferRequest;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
@@ -21,4 +22,10 @@ public interface ClientPlatform {
     void sendSort(SortRequest request);
 
     void sendTransfer(TransferRequest request);
+
+    String getDisableKeyDisplayName();
+
+    ButtonPositions getButtonPositions(String screenType);
+
+    void saveButtonPositions(String screenType, ButtonPositions positions);
 }

@@ -27,6 +27,9 @@ public class ModConfig implements ConfigData {
     public List<String> BLACK_LIST = List.of();
 
     @ConfigEntry.Gui.Tooltip
+    public List<String> BUTTON_POSITIONS = List.of();
+
+    @ConfigEntry.Gui.Tooltip
     public boolean PINYIN = true;
 
     public static void register() {

@@ -7,3 +7,4 @@ out/
 !gradle/wrapper/gradle-wrapper.jar
 !targets/*/gradle/wrapper/gradle-wrapper.jar
 .idea/
+.env

@@ -1,10 +1,14 @@
 package com.sighs.sophisticatedsorter.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.sighs.sophisticatedsorter.common.ButtonPositions;
 import com.sighs.sophisticatedsorter.common.ContainerScreenBehavior;
 import com.sighs.sophisticatedsorter.common.ContainerScreenLayout;
 import com.sighs.sophisticatedsorter.utils.ClientUtils;
-import com.sighs.sophisticatedsorter.visual.VisualStorageScreen;
+import com.sighs.sophisticatedsorter.utils.HintButton;
+import com.sighs.sophisticatedsorter.utils.HintToggleButton;
+import com.sighs.sophisticatedsorter.utils.SearchBoxPositionAccess;
+import com.sighs.sophisticatedsorter.utils.ShiftTransferButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
@@ -55,6 +59,16 @@ public abstract class AbstractContainerScreenMixin extends Screen {
     @Unique private Button sortButton;
     @Unique private Button transferToInventoryButton;
     @Unique private Button transferToStorageButton;
+    @Unique private int sortGroupX;
+    @Unique private int sortGroupY;
+    @Unique private int transferGroupX;
+    @Unique private int transferGroupY;
+    @Unique private boolean draggingSortGroup;
+    @Unique private boolean draggingTransferGroup;
+    @Unique private int dragStartX;
+    @Unique private int dragStartY;
+    @Unique private double dragTotalX;
+    @Unique private double dragTotalY;
 
     @Inject(method = "init", at = @At("RETURN"))
     private void initializeSorterControls(CallbackInfo ci) {
@@ -67,18 +81,24 @@ public abstract class AbstractContainerScreenMixin extends Screen {
 
         var menu = Minecraft.getInstance().player.containerMenu;
         Position blankPosition = new Position(0, 0);
-        Position searchPosition = new Position(leftPos + 7, topPos + 5);
+
+        String screenType = this.getClass().getName();
+        ButtonPositions buttonPositions = ClientUtils.getButtonPositions(screenType);
+        this.sortGroupX = buttonPositions.sortX();
+        this.sortGroupY = buttonPositions.sortY();
+        this.transferGroupX = buttonPositions.transferX();
+        this.transferGroupY = buttonPositions.transferY();
 
         SortButtonsPosition sortButtonsPosition = Config.CLIENT.sortButtonsPosition.get();
         if (sortButtonsPosition != SortButtonsPosition.HIDDEN) {
-            toggleButton = new ToggleButton(blankPosition, ButtonDefinitions.SORT_BY, button -> {
+            toggleButton = new HintToggleButton(blankPosition, ButtonDefinitions.SORT_BY, button -> {
                 if (button == 0) {
                     ClientUtils.toggleSortBy();
                 }
             }, ClientUtils::getSortBy);
             addRenderableWidget(toggleButton);
 
-            sortButton = new Button(blankPosition, ButtonDefinitions.SORT, button -> {
+            sortButton = new HintButton(blankPosition, ButtonDefinitions.SORT, button -> {
                 if (button == 0) {
                     ClientUtils.serverSort();
                 }
@@ -90,20 +110,21 @@ public abstract class AbstractContainerScreenMixin extends Screen {
                         ? new Position(leftPos + imageWidth - 31, topPos + 4).x() - 1 - leftPos
                         : imageWidth - 7;
                 int width = xEnd - 7;
+                Position searchPosition = new Position(
+                        leftPos + 7 + sortGroupX, topPos + 5 + sortGroupY);
                 searchBox = ClientUtils.createSearchBox(searchPosition, new Dimension(width, 10), null);
                 addRenderableWidget(searchBox);
 
-                var visualScreen = new VisualStorageScreen();
                 Consumer<Boolean> transferToInventory = filterByContents -> ClientUtils.serverTransfer(false, filterByContents);
-                transferToInventoryButton = ClientUtils.createTransferButton(
-                        visualScreen, transferToInventory,
+                transferToInventoryButton = new ShiftTransferButton(
+                        blankPosition, transferToInventory,
                         ButtonDefinitions.TRANSFER_TO_INVENTORY,
                         ButtonDefinitions.TRANSFER_TO_INVENTORY_FILTERED);
                 addRenderableWidget(transferToInventoryButton);
 
                 Consumer<Boolean> transferToStorage = filterByContents -> ClientUtils.serverTransfer(true, filterByContents);
-                transferToStorageButton = ClientUtils.createTransferButton(
-                        visualScreen, transferToStorage,
+                transferToStorageButton = new ShiftTransferButton(
+                        blankPosition, transferToStorage,
                         ButtonDefinitions.TRANSFER_TO_STORAGE,
                         ButtonDefinitions.TRANSFER_TO_STORAGE_FILTERED);
                 addRenderableWidget(transferToStorageButton);
@@ -115,6 +136,11 @@ public abstract class AbstractContainerScreenMixin extends Screen {
 
     @Unique
     private void resetWidgetPosition(AbstractContainerMenu menu) {
+        resetWidgetPosition(menu, false);
+    }
+
+    @Unique
+    private void resetWidgetPosition(AbstractContainerMenu menu, boolean forceSearchPosition) {
         if (sortButton == null) {
             return;
         }
@@ -133,22 +159,117 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         ContainerScreenLayout.Positions positions = behavior.positions(
                 leftPos, topPos, imageWidth, inventoryLabelX, inventoryLabelY,
                 inventoryRight, inventoryTop);
-        Position topPosition1 = new Position(positions.topToggleX(), positions.topToggleY());
-        Position topPosition2 = new Position(positions.topSortX(), positions.topSortY());
-        Position bottomPosition1 = new Position(positions.bottomToggleX(), positions.bottomToggleY());
-        Position bottomPosition2 = new Position(positions.bottomSortX(), positions.bottomSortY());
+        Position topPosition1 = new Position(
+                positions.topToggleX() + sortGroupX, positions.topToggleY() + sortGroupY);
+        Position topPosition2 = new Position(
+                positions.topSortX() + sortGroupX, positions.topSortY() + sortGroupY);
+        Position bottomPosition1 = new Position(
+                positions.bottomToggleX() + transferGroupX, positions.bottomToggleY() + transferGroupY);
+        Position bottomPosition2 = new Position(
+                positions.bottomSortX() + transferGroupX, positions.bottomSortY() + transferGroupY);
 
         if (behavior.isInventoryScreen()) {
-            toggleButton.setPosition(bottomPosition1);
-            sortButton.setPosition(bottomPosition2);
+            toggleButton.setPosition(new Position(
+                    positions.bottomToggleX() + sortGroupX, positions.bottomToggleY() + sortGroupY));
+            sortButton.setPosition(new Position(
+                    positions.bottomSortX() + sortGroupX, positions.bottomSortY() + sortGroupY));
         } else {
             toggleButton.setPosition(topPosition1);
             sortButton.setPosition(topPosition2);
         }
-        if (searchBox != null) {
+        if (transferToInventoryButton != null) {
             transferToInventoryButton.setPosition(bottomPosition1);
             transferToStorageButton.setPosition(bottomPosition2);
         }
+        if (searchBox != null && !behavior.isInventoryScreen()) {
+            SortButtonsPosition sortButtonsPosition = Config.CLIENT.sortButtonsPosition.get();
+            int searchWidth = sortButtonsPosition == SortButtonsPosition.TITLE_LINE_RIGHT
+                    ? imageWidth - 39
+                    : imageWidth - 14;
+            int searchX = leftPos + 7 + sortGroupX;
+            if (searchBox instanceof SearchBoxPositionAccess access) {
+                access.sophisticatedSorter$setMaximizedPosition(searchX, searchWidth);
+            }
+            if (forceSearchPosition || searchBox.isFocused() || !searchBox.getValue().isEmpty()) {
+                boolean collapsed = !searchBox.isFocused()
+                        && searchBox.getValue().isEmpty()
+                        && searchBox.getWidth() <= searchBox.getHeight();
+                int visibleSearchX = collapsed
+                        ? searchX + searchWidth - searchBox.getHeight()
+                        : searchX;
+                searchBox.setPosition(new Position(visibleSearchX, topPos + 5 + sortGroupY));
+            }
+        }
+    }
+
+    @Unique
+    private boolean isOverSortGroup(double mouseX, double mouseY) {
+        return (searchBox != null && searchBox.isMouseOver(mouseX, mouseY))
+                || (sortButton != null && sortButton.isMouseOver(mouseX, mouseY))
+                || (toggleButton != null && toggleButton.isMouseOver(mouseX, mouseY));
+    }
+
+    @Unique
+    private boolean isOverTransferGroup(double mouseX, double mouseY) {
+        return (transferToInventoryButton != null && transferToInventoryButton.isMouseOver(mouseX, mouseY))
+                || (transferToStorageButton != null && transferToStorageButton.isMouseOver(mouseX, mouseY));
+    }
+
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    private void beginGroupDrag(double mouseX, double mouseY, int button,
+                                CallbackInfoReturnable<Boolean> cir) {
+        if (button != 1 || !behavior.shouldHandleClick((Object) this instanceof CreativeModeInventoryScreen,
+                (Object) this instanceof StorageScreenBase<?>)) {
+            return;
+        }
+        if (isOverSortGroup(mouseX, mouseY)) {
+            draggingSortGroup = true;
+        } else if (isOverTransferGroup(mouseX, mouseY)) {
+            draggingTransferGroup = true;
+        } else {
+            return;
+        }
+        dragStartX = draggingSortGroup ? sortGroupX : transferGroupX;
+        dragStartY = draggingSortGroup ? sortGroupY : transferGroupY;
+        dragTotalX = 0;
+        dragTotalY = 0;
+        cir.setReturnValue(true);
+    }
+
+    @Inject(method = "mouseDragged", at = @At("HEAD"), cancellable = true)
+    private void dragGroup(double mouseX, double mouseY, int button, double dragX, double dragY,
+                           CallbackInfoReturnable<Boolean> cir) {
+        if (!draggingSortGroup && !draggingTransferGroup) {
+            return;
+        }
+        dragTotalX += dragX;
+        dragTotalY += dragY;
+        int nextX = dragStartX + (int) Math.round(dragTotalX);
+        int nextY = dragStartY + (int) Math.round(dragTotalY);
+        if (draggingSortGroup) {
+            sortGroupX = nextX;
+            sortGroupY = nextY;
+        } else {
+            transferGroupX = nextX;
+            transferGroupY = nextY;
+        }
+        var menu = Minecraft.getInstance().player.containerMenu;
+        resetWidgetPosition(menu, true);
+        cir.setReturnValue(true);
+    }
+
+    @Inject(method = "mouseReleased", at = @At("HEAD"), cancellable = true)
+    private void endGroupDrag(double mouseX, double mouseY, int button,
+                              CallbackInfoReturnable<Boolean> cir) {
+        if (!draggingSortGroup && !draggingTransferGroup) {
+            return;
+        }
+        String screenType = this.getClass().getName();
+        ClientUtils.saveButtonPositions(screenType,
+                new ButtonPositions(sortGroupX, sortGroupY, transferGroupX, transferGroupY));
+        draggingSortGroup = false;
+        draggingTransferGroup = false;
+        cir.setReturnValue(true);
     }
 
     @Inject(method = "renderTooltip", at = @At("HEAD"))

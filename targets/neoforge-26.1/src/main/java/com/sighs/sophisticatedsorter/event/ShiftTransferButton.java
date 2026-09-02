@@ -37,6 +37,7 @@ final class ShiftTransferButton extends Button {
 
     @Override
     protected List<Component> getTooltip() {
-        return (Minecraft.getInstance().hasShiftDown() ? shiftDefinition : definition).getTooltip();
+        return ScreenInit.appendTooltipHint(
+                (Minecraft.getInstance().hasShiftDown() ? shiftDefinition : definition).getTooltip());
     }
 }

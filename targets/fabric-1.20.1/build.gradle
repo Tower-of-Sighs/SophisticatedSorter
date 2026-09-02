@@ -3,13 +3,13 @@ buildscript {
         gradlePluginPortal()
         maven { url = 'https://maven.fabricmc.net/' }
         mavenCentral()
-        maven { url = 'https://api.modrinth.com/maven' }
+        maven { url = 'https://cursemaven.com' }
     }
     configurations { sophisticatedCoreArtifact }
     dependencies {
         classpath 'net.fabricmc:fabric-loom:1.10.5'
         classpath 'me.modmuss50:mod-publish-plugin:2.1.1'
-        sophisticatedCoreArtifact 'maven.modrinth:9jxwkYQL:BP3CQI2v'
+        sophisticatedCoreArtifact 'curse.maven:sophisticated-core-unofficial-fabric-port-979317:7341057'
     }
 }
 
@@ -56,11 +56,11 @@ repositories {
         content { includeGroupByRegex 'me\\.shedaniel(\\..*)?' }
     }
     maven {
-        url = 'https://api.modrinth.com/maven'
+        url = 'https://cursemaven.com'
     }
 }
 
-def sophisticatedCoreCoordinate = 'maven.modrinth:9jxwkYQL:BP3CQI2v'
+def sophisticatedCoreCoordinate = 'curse.maven:sophisticated-core-unofficial-fabric-port-979317:7341057'
 def sophisticatedCoreArtifact = buildscript.configurations.sophisticatedCoreArtifact
 def extractedCoreLibraries = layout.buildDirectory.dir('generated/sophisticatedcore-libs')
 def extractSophisticatedCoreLibraries = tasks.register('extractSophisticatedCoreLibraries', Sync) {
@@ -84,7 +84,7 @@ if (!extractedTransferLibrary.get().asFile.exists()) {
     }
 }
 def extractedPortingLibLibraries = layout.buildDirectory.dir('generated/porting-lib-libs')
-// Core 1.20.1 embeds only part of Porting Lib; add the missing modules from its Modrinth artifact.
+// Core 1.20.1 embeds only part of Porting Lib; add the missing modules from its Curse Maven artifact.
 def extractPortingLibLibraries = tasks.register('extractPortingLibLibraries', Sync) {
     from { zipTree(configurations.portingLibArtifact.singleFile) }
     include 'META-INF/jars/*.jar'
@@ -110,9 +110,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
     modImplementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}"
     modImplementation sophisticatedCoreCoordinate
-    modImplementation 'maven.modrinth:ouNrBQtq:Jk6o7s4h'
-    modImplementation 'maven.modrinth:ohNO6lps:HvR3IdRE'
-    portingLibArtifact 'maven.modrinth:tEJPA4Ty:1pOFZAmz'
+    modImplementation 'curse.maven:sophisticated-backpacks-unofficial-fabric-port-979322:7147929'
+    modImplementation 'curse.maven:forge-config-api-port-547434:7260491'
+    portingLibArtifact 'curse.maven:porting-lib-696251:5245141'
     modImplementation files(extractedTransferLibrary).builtBy(extractSophisticatedCoreLibraries)
     modRuntimeOnly extractedCoreLibraryJars.builtBy(extractSophisticatedCoreLibraries)
     modRuntimeOnly extractedPortingLibLibraryJars.builtBy(extractPortingLibLibraries)

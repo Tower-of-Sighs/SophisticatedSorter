@@ -1,10 +1,12 @@
 package com.sighs.sophisticatedsorter.utils;
 
 import com.sighs.sophisticatedsorter.Config;
+import com.sighs.sophisticatedsorter.common.ButtonPositions;
 import com.sighs.sophisticatedsorter.common.SortRequest;
 import com.sighs.sophisticatedsorter.common.TransferRequest;
 import com.sighs.sophisticatedsorter.network.ServerSortPacket;
 import com.sighs.sophisticatedsorter.network.ServerTransferPacket;
+import com.sighs.sophisticatedsorter.registry.ModKeybindings;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 
@@ -54,5 +56,20 @@ public final class PlatformClient implements ClientPlatform {
     @Override
     public void sendTransfer(TransferRequest request) {
         PacketDistributor.sendToServer(new ServerTransferPacket(request));
+    }
+
+    @Override
+    public String getDisableKeyDisplayName() {
+        return KeyDisplayNames.displayName(ModKeybindings.DISABLE_KEY);
+    }
+
+    @Override
+    public ButtonPositions getButtonPositions(String screenType) {
+        return Config.getButtonPositions(screenType);
+    }
+
+    @Override
+    public void saveButtonPositions(String screenType, ButtonPositions positions) {
+        Config.saveButtonPositions(screenType, positions);
     }
 }

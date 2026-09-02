@@ -3,13 +3,13 @@ buildscript {
         gradlePluginPortal()
         maven { url = 'https://maven.fabricmc.net/' }
         mavenCentral()
-        maven { url = 'https://api.modrinth.com/maven' }
+        maven { url = 'https://cursemaven.com' }
     }
     configurations { sophisticatedCoreArtifact }
     dependencies {
         classpath 'net.fabricmc:fabric-loom:1.10.5'
         classpath 'me.modmuss50:mod-publish-plugin:2.1.1'
-        sophisticatedCoreArtifact 'maven.modrinth:9jxwkYQL:ZLVrtF0Q'
+        sophisticatedCoreArtifact 'curse.maven:sophisticated-core-unofficial-fabric-port-979317:7344653'
     }
 }
 
@@ -51,10 +51,10 @@ repositories {
         url = 'https://maven.shedaniel.me/'
         content { includeGroupByRegex 'me\\.shedaniel(\\..*)?' }
     }
-    maven { url = 'https://api.modrinth.com/maven' }
+    maven { url = 'https://cursemaven.com' }
 }
 
-def sophisticatedCoreCoordinate = 'maven.modrinth:9jxwkYQL:ZLVrtF0Q'
+def sophisticatedCoreCoordinate = 'curse.maven:sophisticated-core-unofficial-fabric-port-979317:7344653'
 def sophisticatedCoreArtifact = buildscript.configurations.sophisticatedCoreArtifact
 def extractedCoreLibraries = layout.buildDirectory.dir('generated/sophisticatedcore-libs')
 def extractSophisticatedCoreLibraries = tasks.register('extractSophisticatedCoreLibraries', Sync) {
@@ -89,8 +89,8 @@ dependencies {
     include "com.electronwill.night-config:core:3.8.3"
     include "com.electronwill.night-config:toml:3.8.3"
     modImplementation sophisticatedCoreCoordinate
-    modImplementation 'maven.modrinth:ouNrBQtq:nHhuPdda'
-    modImplementation 'maven.modrinth:ohNO6lps:N5qzq0XV'
+    modImplementation 'curse.maven:sophisticated-backpacks-unofficial-fabric-port-979322:6844426'
+    modImplementation 'curse.maven:forge-config-api-port-547434:7213608'
     modImplementation files(extractedTransferLibrary).builtBy(extractSophisticatedCoreLibraries)
     modRuntimeOnly extractedCoreLibraryJars.builtBy(extractSophisticatedCoreLibraries)
 }
