@@ -30,6 +30,9 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import com.sighs.sophisticatedsorter.settings.ContainerMemorySlotGuard;
+import com.sighs.sophisticatedsorter.settings.ModMenus;
+import com.sighs.sophisticatedsorter.settings.ContainerSettingsTracker;
 import com.sighs.sophisticatedsorter.utils.CoreUtils;
 import com.sighs.sophisticatedsorter.utils.PlatformSortBackend;
 import org.slf4j.Logger;
@@ -45,5 +48,12 @@ public class SophisticatedSorter {
     public SophisticatedSorter(IEventBus modEventBus, ModContainer modContainer) {
         CoreUtils.installPlatform(PlatformSortBackend.INSTANCE);
         modContainer.registerConfig(ModConfig.Type.CLIENT, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
+        ModMenus.register(modEventBus);
+        ContainerSettingsTracker.register(NeoForge.EVENT_BUS);
+        ContainerMemorySlotGuard.register();
+        if (modContainer.getModInfo() != null && net.neoforged.fml.loading.FMLLoader.getDist() == net.neoforged.api.distmarker.Dist.CLIENT) {
+            com.sighs.sophisticatedsorter.client.ClientModSetup.init(modEventBus);
+        }
     }
 }

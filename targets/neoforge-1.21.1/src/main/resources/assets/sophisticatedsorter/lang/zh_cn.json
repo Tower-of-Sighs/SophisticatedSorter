@@ -1,5 +1,14 @@
 {
   "key.categories.sophisticatedsorter": "精妙整理",
   "key.sophisticatedsorter.sort": "整理容器",
-  "key.sophisticatedsorter.disable": "屏蔽当前容器"
+  "key.sophisticatedsorter.disable": "屏蔽当前容器",
+  "gui.sophisticatedsorter.drag_hint": "右键拖动以移动，按 %s 隐藏",
+  "gui.sophisticatedsorter.settings.open": "容器设置",
+  "gui.sophisticatedsorter.settings.player_inventory": "玩家物品栏设置",
+  "gui.sophisticatedsorter.settings.main": "主设置",
+  "gui.sophisticatedsorter.settings.main.tooltip": "主设置",
+  "gui.sophisticatedsorter.settings.context": "容器",
+  "gui.sophisticatedsorter.settings.context.tooltip": "这些设置仅适用于该容器。",
+  "gui.sophisticatedsorter.return_to_container.tooltip": "返回容器",
+  "gui.sophisticatedsorter.settings.title": "容器设置"
 }

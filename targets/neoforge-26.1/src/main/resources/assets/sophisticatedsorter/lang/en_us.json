@@ -1,5 +1,6 @@
 {
   "key.categories.sophisticatedsorter": "Sophisticated Sorter",
   "key.sophisticatedsorter.sort": "Sort Container",
-  "key.sophisticatedsorter.disable": "Disable buttons on current Container"
+  "key.sophisticatedsorter.disable": "Disable buttons on current Container",
+  "gui.sophisticatedsorter.drag_hint": "Right-click drag to move, press %s to hide",
 }

@@ -1,6 +1,5 @@
 package com.sighs.sophisticatedsorter.utils;
 
-import com.sighs.sophisticatedsorter.common.TooltipText;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
@@ -12,8 +11,11 @@ public final class TooltipHints {
     private TooltipHints() {
     }
 
+    /** Translation key of the "drag with right button, press <key> to disable" hint. */
+    public static final String DRAG_HINT_KEY = "gui.sophisticatedsorter.drag_hint";
+
     public static Component dragTooltipHint() {
-        return Component.literal(TooltipText.dragTooltip(ClientUtils.disableKeyDisplayName()))
+        return Component.translatable(DRAG_HINT_KEY, ClientUtils.disableKeyDisplayName())
                 .withStyle(ChatFormatting.GRAY);
     }
 

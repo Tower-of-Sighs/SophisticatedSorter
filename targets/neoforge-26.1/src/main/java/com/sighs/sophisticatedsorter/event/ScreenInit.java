@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.sighs.sophisticatedsorter.Config;
 import com.sighs.sophisticatedsorter.SophisticatedSorter;
 import com.sighs.sophisticatedsorter.common.ContainerScreenBehavior;
-import com.sighs.sophisticatedsorter.common.TooltipText;
 import com.sighs.sophisticatedsorter.registry.ModKeybindings;
 import com.sighs.sophisticatedsorter.utils.ClientUtils;
 import com.sighs.sophisticatedsorter.utils.PlatformClient;
@@ -50,7 +49,7 @@ public final class ScreenInit {
             Collections.synchronizedMap(new WeakHashMap<>());
     private static Component dragTooltipHint() {
         String disableKey = disableKeyName();
-        return Component.literal(TooltipText.dragTooltip(disableKey))
+        return Component.translatable("gui.sophisticatedsorter.drag_hint", disableKey)
                 .withStyle(ChatFormatting.GRAY);
     }
 

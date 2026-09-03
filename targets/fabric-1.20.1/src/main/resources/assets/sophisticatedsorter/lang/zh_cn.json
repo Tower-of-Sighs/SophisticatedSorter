@@ -2,6 +2,7 @@
   "key.categories.sophisticatedsorter": "精妙整理",
   "key.sophisticatedsorter.sort": "整理容器",
   "key.sophisticatedsorter.disable": "屏蔽当前容器",
+  "gui.sophisticatedsorter.drag_hint": "右键拖动以移动，按 %s 隐藏",
 
   "text.autoconfig.sophisticatedsorter.title": "精妙整理配置",
 

@@ -6,6 +6,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Neo's config APIs
@@ -19,6 +20,16 @@ public class Config {
     public static ModConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
     public static ModConfigSpec.ConfigValue<Boolean> PINYIN;
     public static ModConfigSpec.ConfigValue<List<? extends String>> BUTTON_POSITIONS;
+
+    /**
+     * Server-side config that hosts the Sophisticated Core {@link StackUpgradeConfig}. Core's
+     * {@code InventoryHandler} asks its stack-upgrade config for item stack limits whenever the
+     * handler has real slots, and {@code StackUpgradeConfig.canStackItem} only returns safely when
+     * the value it reads belongs to a registered (and therefore loaded) spec - mirroring how
+     * Sophisticated Backpacks hosts its {@code StackUpgradeConfig} in its server config.
+     */
+    public static final Server SERVER;
+    public static final ModConfigSpec SERVER_SPEC;
 
     static {
         BUILDER.push("Setting");
@@ -50,6 +61,18 @@ public class Config {
                 );
 
         SPEC = BUILDER.build();
+
+        var serverSpec = new ModConfigSpec.Builder().configure(Server::new);
+        SERVER_SPEC = serverSpec.getRight();
+        SERVER = serverSpec.getLeft();
+    }
+
+    public static final class Server {
+        public final StackUpgradeConfig stackUpgrade;
+
+        public Server(ModConfigSpec.Builder builder) {
+            this.stackUpgrade = new StackUpgradeConfig(builder);
+        }
     }
 
     /**
