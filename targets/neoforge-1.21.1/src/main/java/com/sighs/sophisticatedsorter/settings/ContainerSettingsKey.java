@@ -79,6 +79,47 @@ public final class ContainerSettingsKey {
 				: block(ResourceKey.create(Registries.DIMENSION, buf.readResourceLocation()), buf.readBlockPos());
 	}
 
+	/**
+	 * Stable string key used in the server-side SavedData store. Block targets are
+	 * {@code "block:<namespace>:<path>:<x>_<y>_<z>"} (the dimension is included so two dimensions'
+	 * containers never collide), the player inventory is {@value #PLAYER_INVENTORY_FILE}.
+	 */
+	public String toStorageKey() {
+		if (playerInventory) {
+			return PLAYER_INVENTORY_FILE;
+		}
+		return "block:" + dimension.location().getNamespace() + ":" + dimension.location().getPath() + ":"
+				+ pos.getX() + "_" + pos.getY() + "_" + pos.getZ();
+	}
+
+	/** Reverses {@link #toStorageKey()}; returns null for unknown/malformed keys. */
+	@Nullable
+	public static ContainerSettingsKey fromStorageKey(String key) {
+		if (key == null) {
+			return null;
+		}
+		if (PLAYER_INVENTORY_FILE.equals(key)) {
+			return playerInventory();
+		}
+		if (!key.startsWith("block:")) {
+			return null;
+		}
+		String[] parts = key.split(":", 4);
+		if (parts.length != 4) {
+			return null;
+		}
+		String[] coords = parts[3].split("_");
+		if (coords.length != 3) {
+			return null;
+		}
+		try {
+			BlockPos pos = new BlockPos(Integer.parseInt(coords[0]), Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
+			return block(ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(parts[1], parts[2])), pos);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {

@@ -9,33 +9,27 @@ import net.p3pp3rf1y.sophisticatedcore.settings.ISlotColorCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import com.sighs.sophisticatedsorter.settings.ContainerSettingsHandler;
-import com.sighs.sophisticatedsorter.settings.ContainerSettingsKey;
-import com.sighs.sophisticatedsorter.settings.ContainerSettingsStorage;
 
 /**
- * Client-side reader of the per-slot settings of the container the player currently has open. The
- * server resolves the open menu to a {@link ContainerSettingsKey} (its slots reference the real
- * block entity) and pushes it to {@link ClientTrackedContainer}; this reader builds a settings
- * handler over the shared settings storage for that key, so vanilla container screens can draw the
- * same slot highlights the settings screen shows.
+ * Client-side reader of the per-slot settings categories of a container, given its settings contents
+ * tag. The tag is the client mirror of the server-owned settings
+ * ({@link ClientContainerSettingsCache}), pushed by the server when a container is opened or its
+ * settings change; the caller (the container-screen decoration mixin) passes the tag for the
+ * currently open container so vanilla screens can draw the same slot highlights the settings screen
+ * shows.
  * <p>
- * Only the settings categories are read - the handler is built over the shared contents tag with
- * lazy suppliers that are never dereferenced for color reads, so this is cheap and has no side
- * effects on the real inventory.
+ * Only the settings categories are read - the handler is built over the contents tag with lazy
+ * suppliers that are never dereferenced for color reads, so this is cheap and has no side effects.
  */
 public final class ContainerSlotHighlighter {
 	private ContainerSlotHighlighter() {
 	}
 
-	/** Settings handler for the currently tracked container, or null when none is open / resolvable. */
+	/** Settings handler over the given contents tag (no side effects on any store). */
 	@Nullable
-	public static SettingsHandler settingsForTrackedContainer() {
-		ContainerSettingsKey key = ClientTrackedContainer.getCurrentKey();
-		if (key == null || key.isPlayerInventory()) {
-			return null;
-		}
+	public static SettingsHandler settingsForContents(net.minecraft.nbt.CompoundTag contents) {
 		return new ContainerSettingsHandler(
-				ContainerSettingsStorage.get().getOrCreateContents(key),
+				contents,
 				() -> {},
 				() -> null,
 				() -> null);

@@ -63,7 +63,10 @@ public final class ContainerSettingsSort {
 		if (key == null) {
 			return false;
 		}
-		ContainerSettingsStorage storage = ContainerSettingsStorage.get();
+		ContainerSettingsStore storage = ServerContainerSettingsStore.get();
+		if (storage == null) {
+			return false;
+		}
 		if (key.isPlayerInventory()) {
 			ContainerInventoryHandles.PlayerInventoryHandle realInventory =
 					new ContainerInventoryHandles.PlayerInventoryHandle(player.getInventory());

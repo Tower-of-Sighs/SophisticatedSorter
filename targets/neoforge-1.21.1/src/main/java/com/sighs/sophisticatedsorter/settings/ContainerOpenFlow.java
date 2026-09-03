@@ -2,6 +2,7 @@ package com.sighs.sophisticatedsorter.settings;
 
 import com.sighs.sophisticatedsorter.SophisticatedSorter;
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -47,10 +48,14 @@ public final class ContainerOpenFlow {
 		// original container to reopen when the player leaves the settings screen.
 		ContainerSettingsTracker.get().setReturnKey(player, key);
 		// The opening buffer must carry exactly what ContainerSettingsContainerMenu.fromBuffer reads:
-		// the key, then the real slot count (NeoForge menu-type extra data).
+		// the key, the real slot count, then the container's current settings contents (NeoForge
+		// menu-type extra data) - the client rebuilds its wrapper from these, never from the server store.
+		ServerContainerSettingsStore store = ServerContainerSettingsStore.get();
+		CompoundTag contents = store == null ? new CompoundTag() : store.getOrCreateContents(key);
 		player.openMenu(settingsProvider.provider(), buf -> {
 			key.write(buf);
 			buf.writeVarInt(settingsProvider.slots());
+			buf.writeNbt(contents);
 		});
 	}
 
@@ -84,13 +89,16 @@ public final class ContainerOpenFlow {
 	@Nullable
 	private static SettingsProviderData createSettingsProvider(ServerPlayer player, ContainerSettingsKey key) {
 		if (key.isPlayerInventory()) {
-			ContainerSettingsStorage storage = ContainerSettingsStorage.get();
+			ServerContainerSettingsStore storage = ServerContainerSettingsStore.get();
+			if (storage == null) {
+				return null;
+			}
 			ContainerInventoryHandles.PlayerInventoryHandle realInventory =
 					new ContainerInventoryHandles.PlayerInventoryHandle(player.getInventory());
 			ContainerSettingsWrapper wrapper = ContainerSettingsWrapper.playerInventory(storage, key, realInventory);
 			Component title = Component.translatable("gui.sophisticatedsorter.settings.player_inventory");
 			MenuProvider provider = new SophisticatedMenuProvider(
-					(windowId, inv, pl) -> ContainerSettingsContainerMenu.create(key, wrapper, windowId, pl), title, false);
+					(windowId, inv, pl) -> ContainerSettingsContainerMenu.create(key, wrapper, storage, windowId, pl), title, false);
 			return new SettingsProviderData(provider, wrapper.getInventoryHandler().getSlots());
 		}
 		ContainerTargetResolver.ContainerTarget target = ContainerTargetResolver.resolveTarget(player, key);
@@ -100,10 +108,13 @@ public final class ContainerOpenFlow {
 		IItemHandlerModifiable itemHandler = target.itemHandler();
 		int slots = target.slots();
 		Component title = target.title();
-		ContainerSettingsStorage storage = ContainerSettingsStorage.get();
+		ServerContainerSettingsStore storage = ServerContainerSettingsStore.get();
+		if (storage == null) {
+			return null;
+		}
 		ContainerSettingsWrapper wrapper = new ContainerSettingsWrapper(storage, key, slots, itemHandler, title);
 		MenuProvider provider = new SophisticatedMenuProvider(
-				(windowId, inv, pl) -> ContainerSettingsContainerMenu.create(key, wrapper, windowId, pl), title, false);
+				(windowId, inv, pl) -> ContainerSettingsContainerMenu.create(key, wrapper, storage, windowId, pl), title, false);
 		return new SettingsProviderData(provider, slots);
 	}
 

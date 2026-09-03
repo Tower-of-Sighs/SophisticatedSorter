@@ -29,8 +29,10 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
  * that tag is also invoked by {@link ContainerInventoryHandler} when the (real) contents of the
  * target change, so a file record is created as soon as the sorter actually moves an item.
  * <p>
- * Instances are recreated whenever a settings screen opens. Only the shared
- * {@link ContainerSettingsStorage} keeps state across those opens.
+ * Instances are recreated whenever a settings screen opens. The {@link ContainerSettingsStore} they
+ * are built over is server-authoritative ({@link ServerContainerSettingsStore}, a world SavedData);
+ * on the client it is a mirror fed by server pushes
+ * ({@code ClientContainerSettingsCache}).
  */
 public class ContainerSettingsWrapper implements IStorageWrapper {
 	/**
@@ -45,7 +47,7 @@ public class ContainerSettingsWrapper implements IStorageWrapper {
 	 */
 	private static final StackUpgradeConfig STACK_UPGRADE_CONFIG = Config.SERVER.stackUpgrade;
 
-	private final ContainerSettingsStorage storage;
+	private final ContainerSettingsStore storage;
 	private final ContainerSettingsKey key;
 	private final Runnable contentsSaveHandler;
 	private final boolean[] persistentState = new boolean[] {true};
@@ -59,7 +61,7 @@ public class ContainerSettingsWrapper implements IStorageWrapper {
 	private SortBy sortBy = SortBy.NAME;
 
 	/** Creates the wrapper over the block-entity (or otherwise real) item handler of the target. */
-	public ContainerSettingsWrapper(ContainerSettingsStorage storage, ContainerSettingsKey key, int slots,
+	public ContainerSettingsWrapper(ContainerSettingsStore storage, ContainerSettingsKey key, int slots,
 			@Nullable IItemHandlerModifiable realInventory, Component displayName) {
 		this.storage = storage;
 		this.key = key;
@@ -86,7 +88,7 @@ public class ContainerSettingsWrapper implements IStorageWrapper {
 	}
 
 	/** Creates the wrapper over the 36 main slots of the player inventory. */
-	public static ContainerSettingsWrapper playerInventory(ContainerSettingsStorage storage, ContainerSettingsKey key,
+	public static ContainerSettingsWrapper playerInventory(ContainerSettingsStore storage, ContainerSettingsKey key,
 			ContainerInventoryHandles.PlayerInventoryHandle realInventory) {
 		return new ContainerSettingsWrapper(storage, key, 36, realInventory, Component.literal("Player Inventory"));
 	}

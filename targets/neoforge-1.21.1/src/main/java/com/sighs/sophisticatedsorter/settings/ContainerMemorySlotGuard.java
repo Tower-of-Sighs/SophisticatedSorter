@@ -153,8 +153,12 @@ public final class ContainerMemorySlotGuard {
 		// The settings handler is built lazily per call; it only deserializes the small settings nbt of
 		// the tracked container (the memory tab does the same on every screen rebuild). The inventory-
 		// handler and render-info suppliers are never dereferenced by a memory read.
+		ContainerSettingsStore storage = ServerContainerSettingsStore.get();
+		if (storage == null) {
+			return null;
+		}
 		ContainerSettingsHandler handler = new ContainerSettingsHandler(
-				ContainerSettingsStorage.get().getOrCreateContents(key),
+				storage.getOrCreateContents(key),
 				() -> {},
 				() -> null,
 				() -> null);

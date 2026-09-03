@@ -1,6 +1,7 @@
 package com.sighs.sophisticatedsorter.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.sighs.sophisticatedsorter.client.settings.ClientContainerSettingsCache;
 import com.sighs.sophisticatedsorter.client.settings.ClientTrackedContainer;
 import com.sighs.sophisticatedsorter.client.settings.ContainerSlotHighlighter;
 import com.sighs.sophisticatedsorter.settings.ContainerSettingsKey;
@@ -47,6 +48,9 @@ public abstract class ContainerSettingsEntryMixin extends Screen {
 	/** Memory category of the currently tracked container (same lifecycle as the settings above). */
 	@Unique
 	private MemorySettingsCategory sophisticatedSorter$memoryCategory;
+	/** The exact contents tag the settings handler was built from; rebuilt when the mirror replaces it. */
+	@Unique
+	private net.minecraft.nbt.CompoundTag sophisticatedSorter$highlightContents;
 
 	protected ContainerSettingsEntryMixin(Component title) {
 		super(title);
@@ -55,8 +59,8 @@ public abstract class ContainerSettingsEntryMixin extends Screen {
 	/**
 	 * Draws the per-slot highlight stripes (no-sort / item-display colors) and the memory-slot ghosts
 	 * over the storage slots of the block-entity container this vanilla screen shows, mirroring Core's
-	 * storage screens. The tracked key (server-pushed) may arrive a tick after the screen opens, so the
-	 * handler is rebuilt whenever the tracked key changes.
+	 * storage screens. The tracked key and its contents (server-pushed) may arrive a tick after the
+	 * screen opens, so the handler is rebuilt whenever the tracked key or the mirror's contents change.
 	 */
 	@Inject(method = "renderSlot", at = @At("RETURN"))
 	private void sophisticatedSorter$renderSlotHighlights(GuiGraphics guiGraphics, Slot slot, CallbackInfo ci) {
@@ -71,12 +75,16 @@ public abstract class ContainerSettingsEntryMixin extends Screen {
 		if (trackedKey == null || trackedKey.isPlayerInventory()) {
 			this.sophisticatedSorter$highlightSettings = null;
 			this.sophisticatedSorter$highlightKey = null;
+			this.sophisticatedSorter$highlightContents = null;
 			this.sophisticatedSorter$memoryCategory = null;
 			return;
 		}
-		if (this.sophisticatedSorter$highlightKey == null || !this.sophisticatedSorter$highlightKey.equals(trackedKey)) {
-			this.sophisticatedSorter$highlightSettings = ContainerSlotHighlighter.settingsForTrackedContainer();
+		net.minecraft.nbt.CompoundTag currentContents = ClientContainerSettingsCache.getOrCreateContents(trackedKey);
+		if (this.sophisticatedSorter$highlightKey == null || !this.sophisticatedSorter$highlightKey.equals(trackedKey)
+				|| this.sophisticatedSorter$highlightContents != currentContents) {
+			this.sophisticatedSorter$highlightSettings = ContainerSlotHighlighter.settingsForContents(currentContents);
 			this.sophisticatedSorter$highlightKey = trackedKey;
+			this.sophisticatedSorter$highlightContents = currentContents;
 			this.sophisticatedSorter$memoryCategory = this.sophisticatedSorter$highlightSettings == null
 					? null
 					: this.sophisticatedSorter$highlightSettings.getTypeCategory(MemorySettingsCategory.class);

@@ -19,5 +19,7 @@ public class NetworkHandler {
                 ClientCloseContainerSettingsPayload::handlePayload);
         registrar.playToClient(ClientboundTrackedContainerKeyPayload.TYPE, ClientboundTrackedContainerKeyPayload.STREAM_CODEC,
                 ClientboundTrackedContainerKeyPayload::handlePayload);
+        registrar.playToClient(ClientboundContainerSettingsPayload.TYPE, ClientboundContainerSettingsPayload.STREAM_CODEC,
+                ClientboundContainerSettingsPayload::handlePayload);
     }
 }

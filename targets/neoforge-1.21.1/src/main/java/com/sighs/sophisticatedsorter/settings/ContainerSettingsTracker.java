@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
+import com.sighs.sophisticatedsorter.network.ClientboundContainerSettingsPayload;
 import com.sighs.sophisticatedsorter.network.ClientboundTrackedContainerKeyPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -99,9 +100,17 @@ public final class ContainerSettingsTracker {
 		if (key != null) {
 			get().track(serverPlayer, key);
 		}
-		// Tell the client which container it just opened so vanilla screens can render slot
-		// highlights (the client cannot resolve the key itself - its menu slots wrap a SimpleContainer).
+		// Tell the client which container it just opened so vanilla screens can render slot highlights
+		// (the client cannot resolve the key itself - its menu slots wrap a SimpleContainer), and push
+		// the authoritative settings contents so the highlights/memory ghosts have data.
 		PacketDistributor.sendToPlayer(serverPlayer, new ClientboundTrackedContainerKeyPayload(key));
+		if (key != null && !key.isPlayerInventory()) {
+			ServerContainerSettingsStore store = ServerContainerSettingsStore.get();
+			if (store != null) {
+				PacketDistributor.sendToPlayer(serverPlayer,
+						new ClientboundContainerSettingsPayload(key, store.getContents(key)));
+			}
+		}
 	}
 
 	@SubscribeEvent
