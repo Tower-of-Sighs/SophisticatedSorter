@@ -172,6 +172,14 @@ public final class ClientUtils {
         platform().saveButtonPositions(screenType, positions);
     }
 
+    public static boolean hasContainerSettings() {
+        return platform().hasContainerSettings();
+    }
+
+    public static void openSettingsRequested(boolean playerInventoryScreen) {
+        platform().openSettingsRequested(playerInventoryScreen);
+    }
+
     private static ClientPlatform platform() {
         ClientPlatform current = platform;
         if (current == null) {

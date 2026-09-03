@@ -28,4 +28,22 @@ public interface ClientPlatform {
     ButtonPositions getButtonPositions(String screenType);
 
     void saveButtonPositions(String screenType, ButtonPositions positions);
+
+    /**
+     * Whether this target provides a per-container settings screen reachable from the top-right
+     * button group. When true the shared screen mixin adds a fourth (settings) button to the group
+     * and shifts the group left by one button slot.
+     */
+    default boolean hasContainerSettings() {
+        return false;
+    }
+
+    /**
+     * Called when the settings button in the top-right button group is clicked.
+     *
+     * @param playerInventoryScreen whether the current screen is the player-inventory main screen
+     *                              (the settings target is then the player inventory)
+     */
+    default void openSettingsRequested(boolean playerInventoryScreen) {
+    }
 }

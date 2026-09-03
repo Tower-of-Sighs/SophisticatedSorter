@@ -1,7 +1,7 @@
 package com.sighs.sophisticatedsorter.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.sighs.sophisticatedsorter.client.settings.ContainerSettingsTab;
+import com.sighs.sophisticatedsorter.client.settings.ClientTrackedContainer;
 import com.sighs.sophisticatedsorter.client.settings.ContainerSlotHighlighter;
 import com.sighs.sophisticatedsorter.settings.ContainerSettingsKey;
 import java.util.List;
@@ -10,54 +10,34 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * NeoForge-1.21.1 only: adds the settings entry - a Sophisticated Core {@link net.p3pp3rf1y.sophisticatedcore.client.gui.Tab}
- * with the settings gear, the same tab Core's own storage screens render - to qualifying vanilla
- * container screens and to the player-inventory main screen. Also renders the per-slot highlight
- * stripes (no-sort / item-display colors) of the block-entity container on the normal container
- * screen, so the highlights the settings panel configures stay visible outside it, and the memory
- * slot ghosts: an empty slot with a memorized item shows that item under Core's translucent ghost
- * overlay, exactly like Core's storage screens render empty memorized slots.
+ * NeoForge-1.21.1 only: renders the per-slot highlights of the currently open block-entity container
+ * on vanilla container screens - the no-sort / item-display color stripes and the memory-slot ghost
+ * (an empty memorized slot shows its remembered item under Core's translucent overlay), exactly like
+ * Core's own storage screens. The settings entry itself lives in the shared top-right button group
+ * (see the sorter controls mixin); this mixin only decorates the slots.
  * <p>
  * This target shares {@code common}'s {@code AbstractContainerScreenMixin} with the other targets,
- * so the entry cannot live there; this target-local mixin reuses the shared screen's shadow fields
- * and widget list, and only ever runs on this target's client.
- * <p>
- * Screens that have their own settings entry (Core storage screens, including the sorter's own
- * container-settings screen) or the creative inventory are skipped. The tab sits flush against the
- * right edge of the container background ({@code leftPos + imageWidth}), exactly where Core places
- * its settings/upgrade tab column.
+ * so the decoration cannot live there; this target-local mixin only ever runs on this target's
+ * client. The current container key is the server-pushed one from {@link ClientTrackedContainer}.
  */
 @Mixin(AbstractContainerScreen.class)
 public abstract class ContainerSettingsEntryMixin extends Screen {
-	@Shadow
-	protected int leftPos;
-	@Shadow
-	protected int imageWidth;
-	@Shadow
-	protected int topPos;
-
-	@Unique
-	private ContainerSettingsTab sophisticatedSorter$settingsTab;
 	/** Settings of the currently tracked container, rebuilt when the server-pushed key changes. */
 	@Unique
 	private SettingsHandler sophisticatedSorter$highlightSettings;
@@ -67,36 +47,9 @@ public abstract class ContainerSettingsEntryMixin extends Screen {
 	/** Memory category of the currently tracked container (same lifecycle as the settings above). */
 	@Unique
 	private MemorySettingsCategory sophisticatedSorter$memoryCategory;
+
 	protected ContainerSettingsEntryMixin(Component title) {
 		super(title);
-	}
-
-	@Inject(method = "init", at = @At("RETURN"))
-	private void sophisticatedSorter$addSettingsTab(CallbackInfo ci) {
-		AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) (Object) this;
-		this.sophisticatedSorter$highlightSettings = null;
-		this.sophisticatedSorter$highlightKey = null;
-		this.sophisticatedSorter$memoryCategory = null;
-		if (this.sophisticatedSorter$settingsTab != null) {
-			this.removeWidget(this.sophisticatedSorter$settingsTab);
-			this.sophisticatedSorter$settingsTab = null;
-		}
-		if (!isEligible(containerScreen)) {
-			return;
-		}
-		ContainerSettingsKey explicitKey = containerScreen instanceof InventoryScreen
-				? ContainerSettingsKey.playerInventory()
-				: null;
-		this.sophisticatedSorter$settingsTab = new ContainerSettingsTab(
-				new Position(leftPos + imageWidth, topPos + 4), explicitKey);
-		this.addRenderableWidget(this.sophisticatedSorter$settingsTab);
-	}
-
-	@Inject(method = "renderTooltip", at = @At("HEAD"))
-	private void sophisticatedSorter$renderSettingsTabTooltip(GuiGraphics guiGraphics, int x, int y, CallbackInfo ci) {
-		if (this.sophisticatedSorter$settingsTab != null) {
-			this.sophisticatedSorter$settingsTab.renderTooltip(this, guiGraphics, x, y);
-		}
 	}
 
 	/**
@@ -108,13 +61,13 @@ public abstract class ContainerSettingsEntryMixin extends Screen {
 	@Inject(method = "renderSlot", at = @At("RETURN"))
 	private void sophisticatedSorter$renderSlotHighlights(GuiGraphics guiGraphics, Slot slot, CallbackInfo ci) {
 		// Core's storage/settings screens draw their own highlights and have their own gear entry;
-		// only decorate vanilla container screens (creative excluded via eligibility of the entry).
+		// only decorate vanilla container screens. Player-inventory slots are never decorated.
 		Object self = this;
 		if (self instanceof StorageScreenBase || self instanceof SettingsScreen || self instanceof CreativeModeInventoryScreen
 				|| slot.container instanceof Inventory) {
 			return;
 		}
-		ContainerSettingsKey trackedKey = com.sighs.sophisticatedsorter.client.settings.ClientTrackedContainer.getCurrentKey();
+		ContainerSettingsKey trackedKey = ClientTrackedContainer.getCurrentKey();
 		if (trackedKey == null || trackedKey.isPlayerInventory()) {
 			this.sophisticatedSorter$highlightSettings = null;
 			this.sophisticatedSorter$highlightKey = null;
@@ -171,17 +124,5 @@ public abstract class ContainerSettingsEntryMixin extends Screen {
 		RenderSystem.enableDepthTest();
 		RenderSystem.disableBlend();
 		guiGraphics.pose().popPose();
-	}
-
-	@Unique
-	private static boolean isEligible(AbstractContainerScreen<?> containerScreen) {
-		if (containerScreen instanceof StorageScreenBase || containerScreen instanceof SettingsScreen
-				|| containerScreen instanceof CreativeModeInventoryScreen) {
-			return false;
-		}
-		// The player inventory main screen (InventoryMenu) is a supported settings target, so only
-		// other screens whose menu is the player inventory (e.g. creative) are excluded above.
-		return !(containerScreen.getMenu() instanceof InventoryMenu)
-				|| containerScreen instanceof InventoryScreen;
 	}
 }

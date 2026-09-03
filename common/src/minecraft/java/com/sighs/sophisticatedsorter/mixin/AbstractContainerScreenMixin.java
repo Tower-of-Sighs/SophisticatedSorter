@@ -54,9 +54,23 @@ public abstract class AbstractContainerScreenMixin extends Screen {
     }
 
     @Unique private final ContainerScreenBehavior<ItemStack> behavior = new ContainerScreenBehavior<>();
+    /** Settings gear (12x12) definition for the optional fourth button of the top-right group. */
+    @Unique private static final net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition SETTINGS_DEFINITION =
+            new net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition(
+                    net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension.SQUARE_12,
+                    net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper.SMALL_BUTTON_BACKGROUND,
+                    net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper.SMALL_BUTTON_HOVERED_BACKGROUND,
+                    new net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData(
+                            net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper.ICONS,
+                            new net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position(1, 1),
+                            net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension.SQUARE_256,
+                            new net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV(19, 99),
+                            new net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension(10, 10)),
+                    Component.translatable("gui.sophisticatedsorter.settings.open"));
     @Unique private TextBox searchBox;
     @Unique private ToggleButton toggleButton;
     @Unique private Button sortButton;
+    @Unique private Button settingsButton;
     @Unique private Button transferToInventoryButton;
     @Unique private Button transferToStorageButton;
     @Unique private int sortGroupX;
@@ -105,10 +119,21 @@ public abstract class AbstractContainerScreenMixin extends Screen {
             });
             addRenderableWidget(sortButton);
 
+            if (ClientUtils.hasContainerSettings()) {
+                boolean playerInventoryScreen = inventoryScreen;
+                settingsButton = new HintButton(blankPosition, SETTINGS_DEFINITION, button -> {
+                    if (button == 0) {
+                        ClientUtils.openSettingsRequested(playerInventoryScreen);
+                    }
+                });
+                addRenderableWidget(settingsButton);
+            }
+
             if (!behavior.isInventoryScreen()) {
+                int settingsShrink = settingsButton != null ? 12 : 0;
                 int xEnd = sortButtonsPosition == SortButtonsPosition.TITLE_LINE_RIGHT
-                        ? new Position(leftPos + imageWidth - 31, topPos + 4).x() - 1 - leftPos
-                        : imageWidth - 7;
+                        ? new Position(leftPos + imageWidth - 31 - settingsShrink, topPos + 4).x() - 1 - leftPos
+                        : imageWidth - 7 - settingsShrink;
                 int width = xEnd - 7;
                 Position searchPosition = new Position(
                         leftPos + 7 + sortGroupX, topPos + 5 + sortGroupY);
@@ -159,10 +184,13 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         ContainerScreenLayout.Positions positions = behavior.positions(
                 leftPos, topPos, imageWidth, inventoryLabelX, inventoryLabelY,
                 inventoryRight, inventoryTop);
+        boolean shiftForSettings = settingsButton != null;
         Position topPosition1 = new Position(
-                positions.topToggleX() + sortGroupX, positions.topToggleY() + sortGroupY);
+                positions.topToggleX() + sortGroupX + (shiftForSettings ? -12 : 0),
+                positions.topToggleY() + sortGroupY);
         Position topPosition2 = new Position(
-                positions.topSortX() + sortGroupX, positions.topSortY() + sortGroupY);
+                positions.topSortX() + sortGroupX + (shiftForSettings ? -12 : 0),
+                positions.topSortY() + sortGroupY);
         Position bottomPosition1 = new Position(
                 positions.bottomToggleX() + transferGroupX, positions.bottomToggleY() + transferGroupY);
         Position bottomPosition2 = new Position(
@@ -170,12 +198,22 @@ public abstract class AbstractContainerScreenMixin extends Screen {
 
         if (behavior.isInventoryScreen()) {
             toggleButton.setPosition(new Position(
-                    positions.bottomToggleX() + sortGroupX, positions.bottomToggleY() + sortGroupY));
+                    positions.bottomToggleX() + sortGroupX + (shiftForSettings ? -12 : 0),
+                    positions.bottomToggleY() + sortGroupY));
             sortButton.setPosition(new Position(
-                    positions.bottomSortX() + sortGroupX, positions.bottomSortY() + sortGroupY));
+                    positions.bottomSortX() + sortGroupX + (shiftForSettings ? -12 : 0),
+                    positions.bottomSortY() + sortGroupY));
+            if (settingsButton != null) {
+                settingsButton.setPosition(new Position(
+                        positions.bottomToggleX() + sortGroupX, positions.bottomToggleY() + sortGroupY));
+            }
         } else {
             toggleButton.setPosition(topPosition1);
             sortButton.setPosition(topPosition2);
+            if (settingsButton != null) {
+                settingsButton.setPosition(new Position(
+                        positions.topToggleX() + sortGroupX, positions.topToggleY() + sortGroupY));
+            }
         }
         if (transferToInventoryButton != null) {
             transferToInventoryButton.setPosition(bottomPosition1);
@@ -183,9 +221,10 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         }
         if (searchBox != null && !behavior.isInventoryScreen()) {
             SortButtonsPosition sortButtonsPosition = Config.CLIENT.sortButtonsPosition.get();
-            int searchWidth = sortButtonsPosition == SortButtonsPosition.TITLE_LINE_RIGHT
+            int settingsShrink = shiftForSettings ? 12 : 0;
+            int searchWidth = (sortButtonsPosition == SortButtonsPosition.TITLE_LINE_RIGHT
                     ? imageWidth - 39
-                    : imageWidth - 14;
+                    : imageWidth - 14) - settingsShrink;
             int searchX = leftPos + 7 + sortGroupX;
             if (searchBox instanceof SearchBoxPositionAccess access) {
                 access.sophisticatedSorter$setMaximizedPosition(searchX, searchWidth);
@@ -206,7 +245,8 @@ public abstract class AbstractContainerScreenMixin extends Screen {
     private boolean isOverSortGroup(double mouseX, double mouseY) {
         return (searchBox != null && searchBox.isMouseOver(mouseX, mouseY))
                 || (sortButton != null && sortButton.isMouseOver(mouseX, mouseY))
-                || (toggleButton != null && toggleButton.isMouseOver(mouseX, mouseY));
+                || (toggleButton != null && toggleButton.isMouseOver(mouseX, mouseY))
+                || (settingsButton != null && settingsButton.isMouseOver(mouseX, mouseY));
     }
 
     @Unique
