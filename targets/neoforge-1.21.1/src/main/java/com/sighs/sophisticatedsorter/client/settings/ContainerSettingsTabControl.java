@@ -34,6 +34,15 @@ public class ContainerSettingsTabControl extends StorageSettingsTabControlBase {
 	}
 
 	@Override
+	protected boolean isSettingsCategoryDisabled(String categoryName) {
+		// "global" (main) and "item_display" tabs are not used for arbitrary containers yet - the
+		// container-specific settings that matter are no-sort and memory. Keeping the categories
+		// registered (their data still round-trips to the server store) but hiding the tabs.
+		return "global".equals(categoryName) || "item_display".equals(categoryName)
+				|| super.isSettingsCategoryDisabled(categoryName);
+	}
+
+	@Override
 	protected <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> ISettingsTabFactory<C, T> getSettingsTabFactory(String name) {
 		return (ISettingsTabFactory<C, T>) SETTINGS_TAB_FACTORIES.get(name);
 	}
