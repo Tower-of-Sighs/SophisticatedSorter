@@ -2,6 +2,7 @@ package com.sighs.sophisticatedsorter.utils;
 
 import com.sighs.sophisticatedsorter.ModConfig;
 import com.sighs.sophisticatedsorter.common.ButtonPositionCodec;
+import com.sighs.sophisticatedsorter.common.ScreenId;
 import com.sighs.sophisticatedsorter.common.ButtonPositions;
 import com.sighs.sophisticatedsorter.common.SortRequest;
 import com.sighs.sophisticatedsorter.common.TransferRequest;
@@ -26,7 +27,7 @@ public final class PlatformClient implements ClientPlatform {
 
     @Override
     public boolean isScreenDisabled(String screenId) {
-        return ModConfig.INSTANCE.BLACK_LIST.contains(screenId);
+        return ModConfig.INSTANCE.BLACK_LIST.stream().anyMatch(entry -> ScreenId.matches(entry, screenId));
     }
 
     @Override
@@ -90,7 +91,7 @@ public final class PlatformClient implements ClientPlatform {
                 continue;
             }
             String[] fields = record.split("\\|", -1);
-            if (!fields[0].equals(screenType)) {
+            if (!ScreenId.matches(fields[0], screenType)) {
                 records.add(record);
             }
         }

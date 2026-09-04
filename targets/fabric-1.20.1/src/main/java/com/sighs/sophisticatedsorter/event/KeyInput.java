@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.sighs.sophisticatedsorter.common.ScreenId;
 
 public class KeyInput {
     public static void register() {
@@ -44,7 +45,7 @@ public class KeyInput {
                     List<String> list = new ArrayList<>(ModConfig.INSTANCE.BLACK_LIST);
                     String current = ClientUtils.getScreenId(screen);
                     if (ClientUtils.isDisabledScreen(screen)) {
-                        list.remove(current);
+                        list.removeIf(entry -> ScreenId.matches(entry, current));
                     } else {
                         list.add(current);
                     }

@@ -1,6 +1,7 @@
 package com.sighs.sophisticatedsorter;
 
 import com.sighs.sophisticatedsorter.common.ButtonPositionCodec;
+import com.sighs.sophisticatedsorter.common.ScreenId;
 import com.sighs.sophisticatedsorter.common.ButtonPositions;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod;
@@ -44,7 +45,7 @@ public class Config {
                 .comment("Only valid for containers without invalid slot such as recipe result slot if true.")
                 .define("Filter2", true);
         BLACKLIST = BUILDER
-                .comment("Special of screens.")
+                .comment("Screens whose sorter buttons are hidden (toggle with the disable-buttons key). Entries are \"screenId\" = screen class + \"@\" + title translation key.")
                 .defineList("specialList",
                         List.of(),
                         entry -> entry instanceof String
@@ -54,7 +55,7 @@ public class Config {
                 .define("pinyin", true);
 
         BUTTON_POSITIONS = BUILDER
-                .comment("Per-screen button offsets: screen class|sort X|sort Y|transfer X|transfer Y.")
+                .comment("Per-screen button offsets: screenId (screen class + \"@\" + title key)|sort X|sort Y|transfer X|transfer Y.")
                 .defineList("buttonPositions",
                         List.of(),
                         entry -> entry instanceof String
@@ -101,7 +102,7 @@ public class Config {
                 continue;
             }
             String[] fields = record.split("\\|", -1);
-            if (!fields[0].equals(screenType)) {
+            if (!ScreenId.matches(fields[0], screenType)) {
                 records.add(record);
             }
         }

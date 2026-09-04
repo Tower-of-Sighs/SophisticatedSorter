@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0-hotfix]
+
+- Forge 1.20.1: fixed a production startup crash. The forge mixin config now declares its
+  `refmap`, so mixin targets (e.g. the `quickcraftSlots` accessor) resolve correctly on the
+  SRG-named production runtime instead of failing with "No candidates were found".
+- Per-screen client options now use a combined **screen class + title key** identifier:
+  - Button visibility (disable toggle) and button offset records are stored per screen, so
+    containers that share one screen class (chest, barrel, shulker box, trapped chest - all
+    `ChestScreen`) no longer share button positions or the hide toggle with each other.
+  - The button offset *render/drag* path now uses the same identifier (previously it used the
+    screen class only).
+  - Matching is backward compatible and loose: a stored entry matches when it equals the full
+    `class@title` id, the bare title key (the old format) or the bare screen class, so existing
+    config entries keep working.
+
 ## [1.1.0] - Container Settings
 
 This release brings the new **Container Settings** system to all supported loaders and versions.

@@ -96,7 +96,7 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         var menu = Minecraft.getInstance().player.containerMenu;
         Position blankPosition = new Position(0, 0);
 
-        String screenType = this.getClass().getName();
+        String screenType = ClientUtils.getScreenId(this);
         ButtonPositions buttonPositions = ClientUtils.getButtonPositions(screenType);
         this.sortGroupX = buttonPositions.sortX();
         this.sortGroupY = buttonPositions.sortY();
@@ -304,7 +304,7 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         if (!draggingSortGroup && !draggingTransferGroup) {
             return;
         }
-        String screenType = this.getClass().getName();
+        String screenType = ClientUtils.getScreenId(this);
         ClientUtils.saveButtonPositions(screenType,
                 new ButtonPositions(sortGroupX, sortGroupY, transferGroupX, transferGroupY));
         draggingSortGroup = false;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
+import com.sighs.sophisticatedsorter.common.ScreenId;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Neo's config APIs
@@ -48,7 +49,7 @@ public class Config {
                 .comment("Only valid for containers without invalid slot such as recipe result slot if true.")
                 .define("Filter2", true);
         BLACKLIST = BUILDER
-                .comment("Special of screens.")
+                .comment("Screens whose sorter buttons are hidden (toggle with the disable-buttons key). Entries are \"screenId\" = screen class + \"@\" + title translation key.")
                 .defineList("specialList",
                         List.of(),
                         entry -> entry instanceof String
@@ -58,7 +59,7 @@ public class Config {
                 .define("pinyin", true);
 
         BUTTON_POSITIONS = BUILDER
-                .comment("Per-screen button offsets: screen class|sort X|sort Y|transfer X|transfer Y.")
+                .comment("Per-screen button offsets: screenId (screen class + \"@\" + title key)|sort X|sort Y|transfer X|transfer Y.")
                 .defineList("buttonPositions", List.of(), entry -> entry instanceof String);
 
         MEMORY_SLOT_SORTING = BUILDER
@@ -108,7 +109,7 @@ public class Config {
                 continue;
             }
             String[] fields = record.split("\\|", -1);
-            if (!fields[0].equals(screenType)) {
+            if (!ScreenId.matches(fields[0], screenType)) {
                 records.add(record);
             }
         }
@@ -122,7 +123,7 @@ public class Config {
             return null;
         }
         String[] fields = record.split("\\|", -1);
-        if (fields.length != 5 || fields[0].isEmpty() || (screenType != null && !fields[0].equals(screenType))) {
+        if (fields.length != 5 || fields[0].isEmpty() || (screenType != null && !ScreenId.matches(fields[0], screenType))) {
             return null;
         }
         try {

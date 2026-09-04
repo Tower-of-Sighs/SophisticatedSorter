@@ -2,6 +2,7 @@ package com.sighs.sophisticatedsorter.utils;
 
 import com.sighs.sophisticatedsorter.api.IStorageScreenBase;
 import com.sighs.sophisticatedsorter.common.ButtonPositions;
+import com.sighs.sophisticatedsorter.common.ScreenId;
 import com.sighs.sophisticatedsorter.common.SortCriterion;
 import com.sighs.sophisticatedsorter.common.SortRequestFactory;
 import com.sighs.sophisticatedsorter.common.SortRequest;
@@ -98,8 +99,16 @@ public final class ClientUtils {
         }
     }
 
+    /**
+     * Stable identifier for one screen for the per-screen client options (button visibility toggle and
+     * button offsets): {@code "<screen class>@<title translation key>"}. The screen class alone would
+     * conflate screens that share one class (vanilla chests, barrels, shulker boxes and trapped chests
+     * all use {@link net.minecraft.client.gui.screens.inventory.ChestScreen}), and the title key alone
+     * would conflate different screen classes that show the same translated title, so both are part of
+     * the key. Screens whose title is not translatable (no key) are identified by the class name only.
+     */
     public static String getScreenId(Screen screen) {
-        return getTranslationKey(screen.getTitle());
+        return ScreenId.build(screen.getClass().getName(), getTranslationKey(screen.getTitle()));
     }
 
     private static String getTranslationKey(Component component) {

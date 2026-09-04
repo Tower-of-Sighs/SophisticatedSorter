@@ -16,6 +16,7 @@ import net.neoforged.neoforge.client.event.InputEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.sighs.sophisticatedsorter.common.ScreenId;
 
 @EventBusSubscriber(modid = SophisticatedSorter.MODID, value = Dist.CLIENT)
 public class KeyInput {
@@ -48,7 +49,7 @@ public class KeyInput {
                     List<String> list = new ArrayList<>(Config.BLACKLIST.get());
                     String current = ClientUtils.getScreenId(screen);
                     if (ClientUtils.isDisabledScreen(screen)) {
-                        list.remove(current);
+                        list.removeIf(entry -> ScreenId.matches(entry, current));
                     } else list.add(current);
                     Config.BLACKLIST.set(list);
                     Config.BLACKLIST.save();
