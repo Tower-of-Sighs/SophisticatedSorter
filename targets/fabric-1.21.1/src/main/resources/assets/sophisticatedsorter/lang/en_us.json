@@ -17,5 +17,14 @@
   "text.autoconfig.sophisticatedsorter.option.FILTER.@Tooltip": "When enabled, sort buttons are only shown for containers with more than 10 available slots (excluding the player's inventory)",
 
   "text.autoconfig.sophisticatedsorter.option.BLACK_LIST": "Container Blacklist",
-  "text.autoconfig.sophisticatedsorter.option.BLACK_LIST.@Tooltip": "Containers listed here will not display sort buttons"
+  "text.autoconfig.sophisticatedsorter.option.BLACK_LIST.@Tooltip": "Containers listed here will not display sort buttons",
+
+  "gui.sophisticatedsorter.settings.open": "Container Settings",
+  "gui.sophisticatedsorter.settings.player_inventory": "Player Inventory Settings",
+  "gui.sophisticatedsorter.settings.main": "Main",
+  "gui.sophisticatedsorter.settings.main.tooltip": "Main Settings",
+  "gui.sophisticatedsorter.settings.context": "Container",
+  "gui.sophisticatedsorter.settings.context.tooltip": "These settings apply to this container only.",
+  "gui.sophisticatedsorter.return_to_container.tooltip": "Back to Container",
+  "gui.sophisticatedsorter.settings.title": "Container Settings"
 }

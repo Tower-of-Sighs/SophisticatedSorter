@@ -72,4 +72,22 @@ public final class PlatformClient implements ClientPlatform {
     public void saveButtonPositions(String screenType, ButtonPositions positions) {
         Config.saveButtonPositions(screenType, positions);
     }
+
+    @Override
+    public boolean hasContainerSettings() {
+        return true;
+    }
+
+    @Override
+    public void openSettingsRequested(boolean playerInventoryScreen) {
+        // The settings screen is opened through a server menu swap; the server resolves the target
+        // from its tracker for container screens, while the player-inventory main screen carries an
+        // explicit key (the server cannot derive a block position from the inventory menu).
+        if (playerInventoryScreen) {
+            NetworkHandler.CHANNEL.sendToServer(new com.sighs.sophisticatedsorter.network.ClientOpenContainerSettingsPayload(
+                    com.sighs.sophisticatedsorter.settings.ContainerSettingsKey.playerInventory()));
+        } else {
+            NetworkHandler.CHANNEL.sendToServer(new com.sighs.sophisticatedsorter.network.ClientOpenContainerSettingsPayload());
+        }
+    }
 }

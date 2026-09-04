@@ -1,6 +1,5 @@
 package com.sighs.sophisticatedsorter.settings;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.CompoundContainer;
@@ -33,7 +32,6 @@ public final class ContainerSettingsKeyResolver {
 	 * position. Returns null when the menu does not resolve to a supported block entity (including
 	 * the player inventory).
 	 */
-	@Nullable
 	public static ContainerSettingsKey resolveKey(Player player, AbstractContainerMenu menu) {
 		Container storageContainer = findStorageContainer(player, menu);
 		if (storageContainer == null || storageContainer instanceof Inventory) {
@@ -72,7 +70,6 @@ public final class ContainerSettingsKeyResolver {
 	 * inventory slots occupy the tail of a menu's slot list, so the first slot whose container is
 	 * not the player inventory is the container being viewed.
 	 */
-	@Nullable
 	private static Container findStorageContainer(Player player, AbstractContainerMenu menu) {
 		Inventory playerInventory = player.getInventory();
 		int walked = 0;

@@ -5,10 +5,12 @@ import com.sighs.sophisticatedsorter.common.ButtonPositionCodec;
 import com.sighs.sophisticatedsorter.common.ButtonPositions;
 import com.sighs.sophisticatedsorter.common.SortRequest;
 import com.sighs.sophisticatedsorter.common.TransferRequest;
+import com.sighs.sophisticatedsorter.network.ClientOpenContainerSettingsPayload;
 import com.sighs.sophisticatedsorter.network.NetworkHandler;
 import com.sighs.sophisticatedsorter.network.ServerSortPacket;
 import com.sighs.sophisticatedsorter.network.ServerTransferPacket;
 import com.sighs.sophisticatedsorter.registry.ModKeybindings;
+import com.sighs.sophisticatedsorter.settings.ContainerSettingsKey;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 
@@ -95,5 +97,23 @@ public final class PlatformClient implements ClientPlatform {
         records.add(ButtonPositionCodec.format(screenType, positions));
         ModConfig.INSTANCE.BUTTON_POSITIONS = records;
         AutoConfig.getConfigHolder(ModConfig.class).save();
+    }
+
+    @Override
+    public boolean hasContainerSettings() {
+        return true;
+    }
+
+    @Override
+    public void openSettingsRequested(boolean playerInventoryScreen) {
+        // The settings screen is opened through a server menu swap; the server resolves the target
+        // from its tracker for container screens, while the player-inventory main screen carries an
+        // explicit key (the server cannot derive a block position from the inventory menu).
+        if (playerInventoryScreen) {
+            NetworkHandler.sendToServer(NetworkHandler.OPEN_CONTAINER_SETTINGS_ID,
+                    new ClientOpenContainerSettingsPayload(ContainerSettingsKey.playerInventory()));
+        } else {
+            NetworkHandler.sendToServer(NetworkHandler.OPEN_CONTAINER_SETTINGS_ID, new ClientOpenContainerSettingsPayload());
+        }
     }
 }

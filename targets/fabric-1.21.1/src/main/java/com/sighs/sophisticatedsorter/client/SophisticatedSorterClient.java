@@ -1,6 +1,7 @@
 package com.sighs.sophisticatedsorter.client;
 
 import com.sighs.sophisticatedsorter.event.KeyInput;
+import com.sighs.sophisticatedsorter.network.NetworkHandler;
 import com.sighs.sophisticatedsorter.registry.ModKeybindings;
 import com.sighs.sophisticatedsorter.utils.ClientUtils;
 import com.sighs.sophisticatedsorter.utils.PlatformClient;
@@ -13,5 +14,7 @@ public class SophisticatedSorterClient implements ClientModInitializer {
         ClientUtils.installPlatform(PlatformClient.INSTANCE);
         ModKeybindings.registerKeyMapping();
         KeyInput.register();
+        NetworkHandler.registerClient();
+        ClientModSetup.init();
     }
 }

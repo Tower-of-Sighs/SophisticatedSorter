@@ -7,6 +7,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
 
 @Mod.EventBusSubscriber(modid = SophisticatedSorter.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Config {
@@ -19,6 +20,16 @@ public class Config {
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
     public static ForgeConfigSpec.ConfigValue<Boolean> PINYIN;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> BUTTON_POSITIONS;
+
+    /**
+     * Server-side config that hosts the Sophisticated Core {@link StackUpgradeConfig}. Core's
+     * {@code InventoryHandler} asks its stack-upgrade config for item stack limits whenever the
+     * handler has real slots, and {@code StackUpgradeConfig.canStackItem} only returns safely when
+     * the value it reads belongs to a registered (and therefore loaded) spec - mirroring how
+     * Sophisticated Backpacks hosts its {@code StackUpgradeConfig} in its server config.
+     */
+    public static final Server SERVER;
+    public static final ForgeConfigSpec SERVER_SPEC;
 
     static {
         BUILDER.push("Sorter Setting");
@@ -50,6 +61,18 @@ public class Config {
                 );
 
         SPEC = BUILDER.build();
+
+        var serverSpec = new ForgeConfigSpec.Builder().configure(Server::new);
+        SERVER_SPEC = serverSpec.getRight();
+        SERVER = serverSpec.getLeft();
+    }
+
+    public static final class Server {
+        public final StackUpgradeConfig stackUpgrade;
+
+        public Server(ForgeConfigSpec.Builder builder) {
+            this.stackUpgrade = new StackUpgradeConfig(builder);
+        }
     }
 
     /**

@@ -3,8 +3,8 @@
   "minVersion": "0.8",
   "package": "com.sighs.sophisticatedsorter.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["AbstractContainerMenuAccessor"],
-  "client": ["AbstractContainerScreenMixin", "SearchBoxMixin"],
+  "mixins": ["AbstractContainerMenuAccessor", "ContainerMemorySlotMixin", "ServerContainerClickMixin"],
+  "client": ["AbstractContainerScreenMixin", "SearchBoxMixin", "ContainerSettingsEntryMixin"],
   "injectors": {
     "defaultRequire": 1
   },

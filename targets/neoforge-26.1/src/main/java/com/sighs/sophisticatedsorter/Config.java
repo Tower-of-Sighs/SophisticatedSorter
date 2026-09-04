@@ -1,9 +1,9 @@
 package com.sighs.sophisticatedsorter;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Neo's config APIs
@@ -17,6 +17,23 @@ public class Config {
     public static ModConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
     public static ModConfigSpec.ConfigValue<Boolean> PINYIN;
     public static ModConfigSpec.ConfigValue<List<? extends String>> BUTTON_POSITIONS;
+    /**
+     * Whether sorting should refill memorized slots with the items they are set to remember - the
+     * behavior of core's pre-26.1 sorter (and of the 1.20.1/1.21.1 targets). 26.1's own sorter
+     * dropped memory-slot handling, so when this is disabled memorized slots are sorted like
+     * ordinary slots (only the placement guard keeps non-matching items out).
+     */
+    public static ModConfigSpec.BooleanValue MEMORY_SLOT_SORTING;
+
+    /**
+     * Server-side config that hosts the Sophisticated Core {@link StackUpgradeConfig}. Core's
+     * {@code InventoryHandler} asks its stack-upgrade config for item stack limits whenever the
+     * handler has real slots, and {@code StackUpgradeConfig.canStackItem} only returns safely when
+     * the value it reads belongs to a registered (and therefore loaded) spec - mirroring how
+     * Sophisticated Backpacks hosts its {@code StackUpgradeConfig} in its server config.
+     */
+    public static final Server SERVER;
+    public static final ModConfigSpec SERVER_SPEC;
 
     static {
         BUILDER.push("Setting");
@@ -44,7 +61,24 @@ public class Config {
                 .comment("Per-screen button offsets: screen class|sort X|sort Y|transfer X|transfer Y.")
                 .defineList("buttonPositions", List.of(), entry -> entry instanceof String);
 
+        MEMORY_SLOT_SORTING = BUILDER
+                .comment("When true (default) sorting puts each memorized slot's remembered item into that slot, "
+                        + "matching the pre-26.1 behavior; set to false to sort memory slots like ordinary slots.")
+                .define("memorySlotSorting", true);
+
         SPEC = BUILDER.build();
+
+        var serverSpec = new ModConfigSpec.Builder().configure(Server::new);
+        SERVER_SPEC = serverSpec.getRight();
+        SERVER = serverSpec.getLeft();
+    }
+
+    public static final class Server {
+        public final StackUpgradeConfig stackUpgrade;
+
+        public Server(ModConfigSpec.Builder builder) {
+            this.stackUpgrade = new StackUpgradeConfig(builder);
+        }
     }
 
     /**

@@ -13,5 +13,13 @@ public class NetworkHandler {
         final PayloadRegistrar registrar = event.registrar(SophisticatedSorter.MODID);
         registrar.playToServer(ServerSortPacket.TYPE, ServerSortPacket.STREAM_CODEC, ServerSortPacket::execute);
         registrar.playToServer(ServerTransferPacket.TYPE, ServerTransferPacket.STREAM_CODEC, ServerTransferPacket::execute);
+        registrar.playToServer(ClientOpenContainerSettingsPayload.TYPE, ClientOpenContainerSettingsPayload.STREAM_CODEC,
+                ClientOpenContainerSettingsPayload::handlePayload);
+        registrar.playToServer(ClientCloseContainerSettingsPayload.TYPE, ClientCloseContainerSettingsPayload.STREAM_CODEC,
+                ClientCloseContainerSettingsPayload::handlePayload);
+        registrar.playToClient(ClientboundTrackedContainerKeyPayload.TYPE, ClientboundTrackedContainerKeyPayload.STREAM_CODEC,
+                ClientboundTrackedContainerKeyPayload::handlePayload);
+        registrar.playToClient(ClientboundContainerSettingsPayload.TYPE, ClientboundContainerSettingsPayload.STREAM_CODEC,
+                ClientboundContainerSettingsPayload::handlePayload);
     }
 }

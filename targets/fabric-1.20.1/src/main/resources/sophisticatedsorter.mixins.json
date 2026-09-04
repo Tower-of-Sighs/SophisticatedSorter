@@ -9,13 +9,17 @@
     "SearchBoxMixin",
     "SettingsHandlerMixin",
     "StorageContainerMenuBaseMixin",
-    "StorageContainerMenuBaseNoSortMixin"
+    "StorageContainerMenuBaseNoSortMixin",
+    "ContainerMemorySlotMixin",
+    "ServerContainerClickMixin",
+    "ServerPlayerMenuTrackingMixin"
   ],
   "client": [
     "AbstractContainerScreenMixin",
     "KeyboardHandlerMixin",
     "MouseHandlerMixin",
-    "StorageScreenBaseMixin"
+    "StorageScreenBaseMixin",
+    "ContainerSettingsEntryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

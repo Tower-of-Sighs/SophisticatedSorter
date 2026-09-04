@@ -21,7 +21,11 @@ public class NetworkHandler {
         int packetId = 0;
         CHANNEL.registerMessage(packetId++, ServerSortPacket.class, ServerSortPacket::encode, ServerSortPacket::decode, ServerSortPacket::handle);
         CHANNEL.registerMessage(packetId++, ServerTransferPacket.class, ServerTransferPacket::encode, ServerTransferPacket::decode, ServerTransferPacket::handle);
-
+        CHANNEL.registerMessage(packetId++, ClientOpenContainerSettingsPayload.class, ClientOpenContainerSettingsPayload::encode, ClientOpenContainerSettingsPayload::decode, ClientOpenContainerSettingsPayload::handle);
+        CHANNEL.registerMessage(packetId++, ClientCloseContainerSettingsPayload.class, ClientCloseContainerSettingsPayload::encode, ClientCloseContainerSettingsPayload::decode, ClientCloseContainerSettingsPayload::handle);
+        CHANNEL.registerMessage(packetId++, ClientboundTrackedContainerKeyPayload.class, ClientboundTrackedContainerKeyPayload::encode, ClientboundTrackedContainerKeyPayload::decode, ClientboundTrackedContainerKeyPayload::handle);
+        CHANNEL.registerMessage(packetId++, ClientboundContainerSettingsPayload.class, ClientboundContainerSettingsPayload::encode, ClientboundContainerSettingsPayload::decode, ClientboundContainerSettingsPayload::handle);
+        CHANNEL.registerMessage(packetId++, ClientboundOpenContainerSettingsPayload.class, ClientboundOpenContainerSettingsPayload::encode, ClientboundOpenContainerSettingsPayload::decode, ClientboundOpenContainerSettingsPayload::handle);
     }
 
     // 发送数据包到客户端

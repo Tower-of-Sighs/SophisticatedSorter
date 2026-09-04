@@ -1,6 +1,5 @@
 package com.sighs.sophisticatedsorter.settings;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,13 +23,11 @@ public final class ContainerSettingsKey {
 	/** Fixed file key under which the player-inventory settings are persisted. */
 	public static final String PLAYER_INVENTORY_FILE = "player_inventory";
 
-	@Nullable
 	private final ResourceKey<Level> dimension;
-	@Nullable
 	private final BlockPos pos;
 	private final boolean playerInventory;
 
-	private ContainerSettingsKey(@Nullable ResourceKey<Level> dimension, @Nullable BlockPos pos, boolean playerInventory) {
+	private ContainerSettingsKey(ResourceKey<Level> dimension, BlockPos pos, boolean playerInventory) {
 		this.dimension = dimension;
 		this.pos = pos;
 		this.playerInventory = playerInventory;
@@ -93,7 +90,6 @@ public final class ContainerSettingsKey {
 	}
 
 	/** Reverses {@link #toStorageKey()}; returns null for unknown/malformed keys. */
-	@Nullable
 	public static ContainerSettingsKey fromStorageKey(String key) {
 		if (key == null) {
 			return null;
@@ -114,7 +110,7 @@ public final class ContainerSettingsKey {
 		}
 		try {
 			BlockPos pos = new BlockPos(Integer.parseInt(coords[0]), Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
-			return block(ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(parts[1], parts[2])), pos);
+			return block(ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(parts[1] + ":" + parts[2])), pos);
 		} catch (NumberFormatException e) {
 			return null;
 		}

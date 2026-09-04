@@ -3,8 +3,10 @@ package com.sighs.sophisticatedsorter.utils;
 import com.sighs.sophisticatedsorter.Config;
 import com.sighs.sophisticatedsorter.common.SortRequest;
 import com.sighs.sophisticatedsorter.common.TransferRequest;
+import com.sighs.sophisticatedsorter.network.ClientOpenContainerSettingsPayload;
 import com.sighs.sophisticatedsorter.network.ServerSortPacket;
 import com.sighs.sophisticatedsorter.network.ServerTransferPacket;
+import com.sighs.sophisticatedsorter.settings.ContainerSettingsKey;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 
@@ -54,5 +56,22 @@ public final class PlatformClient implements ClientPlatform {
     @Override
     public void sendTransfer(TransferRequest request) {
         ClientPacketDistributor.sendToServer(new ServerTransferPacket(request));
+    }
+
+    @Override
+    public boolean hasContainerSettings() {
+        return true;
+    }
+
+    @Override
+    public void openSettingsRequested(boolean playerInventoryScreen) {
+        // The settings screen is opened through a server menu swap; the server resolves the target
+        // from its tracker for container screens, while the player-inventory main screen carries an
+        // explicit key (the server cannot derive a block position from the inventory menu).
+        if (playerInventoryScreen) {
+            ClientPacketDistributor.sendToServer(new ClientOpenContainerSettingsPayload(ContainerSettingsKey.playerInventory()));
+        } else {
+            ClientPacketDistributor.sendToServer(new ClientOpenContainerSettingsPayload());
+        }
     }
 }

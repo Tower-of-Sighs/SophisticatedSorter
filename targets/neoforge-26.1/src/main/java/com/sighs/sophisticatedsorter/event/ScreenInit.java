@@ -30,13 +30,16 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.TextBox;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Locale;
-import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.IntConsumer;
@@ -47,6 +50,17 @@ import java.util.function.Supplier;
 public final class ScreenInit {
     private static final Map<AbstractContainerScreen<?>, State> STATES =
             Collections.synchronizedMap(new WeakHashMap<>());
+    /**
+     * Settings gear (12x12) definition for the optional fourth button of the top-right group,
+     * matching the shared sorter controls of the other targets.
+     */
+    private static final ButtonDefinition SETTINGS_DEFINITION = new ButtonDefinition(
+            Dimension.SQUARE_12,
+            GuiHelper.SMALL_BUTTON_BACKGROUND,
+            GuiHelper.SMALL_BUTTON_HOVERED_BACKGROUND,
+            new TextureBlitData(GuiHelper.ICONS, new Position(1, 1), Dimension.SQUARE_256, new UV(19, 99), new Dimension(10, 10)),
+            Component.translatable("gui.sophisticatedsorter.settings.open"));
+
     private static Component dragTooltipHint() {
         String disableKey = disableKeyName();
         return Component.translatable("gui.sophisticatedsorter.drag_hint", disableKey)
@@ -99,11 +113,13 @@ public final class ScreenInit {
         }
         STATES.put(screen, state);
 
+        boolean settingsPresent = ClientUtils.hasContainerSettings();
+        int settingsShrink = settingsPresent ? 12 : 0;
         int left = screen.getLeftPos();
         int top = screen.getTopPos();
         int width = screen.getImageWidth();
         ToggleButton<?> toggleButton = new HintToggleButton<>(
-                new Position(left + width - 19 + state.sortGroupX, top + 4 + state.sortGroupY),
+                new Position(left + width - 19 - settingsShrink + state.sortGroupX, top + 4 + state.sortGroupY),
                 ButtonDefinitions.SORT_BY,
                 button -> {
                     if (button == 0) {
@@ -111,7 +127,7 @@ public final class ScreenInit {
                     }
                 }, ClientUtils::getSortBy);
         Button sortButton = new HintButton(new Position(
-                left + width - 31 + state.sortGroupX, top + 4 + state.sortGroupY),
+                left + width - 31 - settingsShrink + state.sortGroupX, top + 4 + state.sortGroupY),
                 ButtonDefinitions.SORT, button -> {
                     if (button == 0) {
                         ClientUtils.serverSort();
@@ -119,11 +135,22 @@ public final class ScreenInit {
                 });
         state.toggleButton = toggleButton;
         state.sortButton = sortButton;
+        if (settingsPresent) {
+            Button settingsButton = new HintButton(new Position(
+                    left + width - 19 + state.sortGroupX, top + 4 + state.sortGroupY),
+                    SETTINGS_DEFINITION, button -> {
+                        if (button == 0) {
+                            ClientUtils.openSettingsRequested(inventoryScreen);
+                        }
+                    });
+            state.settingsButton = settingsButton;
+            event.addListener(settingsButton);
+        }
 
         if (!inventoryScreen) {
             SortButtonsPosition position =
                     net.p3pp3rf1y.sophisticatedcore.Config.CLIENT.sortButtonsPosition.get();
-            int searchWidth = position == SortButtonsPosition.TITLE_LINE_RIGHT ? width - 39 : width - 7;
+            int searchWidth = (position == SortButtonsPosition.TITLE_LINE_RIGHT ? width - 39 : width - 7) - settingsShrink;
             TextBox searchBox = ClientUtils.createSearchBox(
                     new Position(left + 7 + state.sortGroupX, top + 5 + state.sortGroupY),
                     new Dimension(searchWidth, 10));
@@ -221,6 +248,9 @@ public final class ScreenInit {
         if (state.sortButton != null) {
             state.sortButton.extractTooltip(owner, graphics, mouseX, mouseY);
         }
+        if (state.settingsButton != null) {
+            state.settingsButton.extractTooltip(owner, graphics, mouseX, mouseY);
+        }
         if (state.searchBox != null) {
             state.searchBox.extractTooltip(owner, graphics, mouseX, mouseY);
         }
@@ -267,6 +297,7 @@ public final class ScreenInit {
         private TextBox searchBox;
         private ToggleButton<?> toggleButton;
         private Button sortButton;
+        private Button settingsButton;
         private Button transferToInventoryButton;
         private Button transferToStorageButton;
         private ButtonGroup draggingGroup;
@@ -333,7 +364,8 @@ public final class ScreenInit {
         private boolean isOverSortGroup(double mouseX, double mouseY) {
             return (searchBox != null && searchBox.isMouseOver(mouseX, mouseY))
                     || (sortButton != null && sortButton.isMouseOver(mouseX, mouseY))
-                    || (toggleButton != null && toggleButton.isMouseOver(mouseX, mouseY));
+                    || (toggleButton != null && toggleButton.isMouseOver(mouseX, mouseY))
+                    || (settingsButton != null && settingsButton.isMouseOver(mouseX, mouseY));
         }
 
         private boolean isOverTransferGroup(double mouseX, double mouseY) {
@@ -349,6 +381,7 @@ public final class ScreenInit {
             if (sortButton == null) {
                 return;
             }
+            int settingsShrink = settingsButton != null ? 12 : 0;
             int inventoryRight = 0;
             int inventoryTop = 0;
             if (!inventoryScreen) {
@@ -364,21 +397,30 @@ public final class ScreenInit {
             int width = screen.getImageWidth();
             if (inventoryScreen) {
                 toggleButton.setPosition(new Position(
-                        left + 8 + 149 + sortGroupX,
+                        left + 8 + 149 - settingsShrink + sortGroupX,
                         top + 84 - 2 + sortGroupY));
                 sortButton.setPosition(new Position(
-                        left + 8 + 137 + sortGroupX,
+                        left + 8 + 137 - settingsShrink + sortGroupX,
                         top + 84 - 2 + sortGroupY));
+                if (settingsButton != null) {
+                    settingsButton.setPosition(new Position(
+                            left + 8 + 149 + sortGroupX,
+                            top + 84 - 2 + sortGroupY));
+                }
             } else {
                 toggleButton.setPosition(new Position(
-                        left + width - 19 + sortGroupX, top + 4 + sortGroupY));
+                        left + width - 19 - settingsShrink + sortGroupX, top + 4 + sortGroupY));
                 sortButton.setPosition(new Position(
-                        left + width - 31 + sortGroupX, top + 4 + sortGroupY));
+                        left + width - 31 - settingsShrink + sortGroupX, top + 4 + sortGroupY));
+                if (settingsButton != null) {
+                    settingsButton.setPosition(new Position(
+                            left + width - 19 + sortGroupX, top + 4 + sortGroupY));
+                }
                 if (searchBox != null
                         && (forceSearchPosition || searchBox.isFocused() || !searchBox.getValue().isEmpty())) {
                     SortButtonsPosition position =
                             net.p3pp3rf1y.sophisticatedcore.Config.CLIENT.sortButtonsPosition.get();
-                    int searchWidth = position == SortButtonsPosition.TITLE_LINE_RIGHT ? width - 39 : width - 7;
+                    int searchWidth = (position == SortButtonsPosition.TITLE_LINE_RIGHT ? width - 39 : width - 7) - settingsShrink;
                     int searchX = left + 7 + sortGroupX;
                     if (searchBox instanceof SearchBoxPositionAccess access) {
                         access.sophisticatedSorter$setMaximizedPosition(searchX, searchWidth);
@@ -393,7 +435,7 @@ public final class ScreenInit {
                 } else if (searchBox instanceof SearchBoxPositionAccess access) {
                     SortButtonsPosition position =
                             net.p3pp3rf1y.sophisticatedcore.Config.CLIENT.sortButtonsPosition.get();
-                    int searchWidth = position == SortButtonsPosition.TITLE_LINE_RIGHT ? width - 39 : width - 7;
+                    int searchWidth = (position == SortButtonsPosition.TITLE_LINE_RIGHT ? width - 39 : width - 7) - settingsShrink;
                     access.sophisticatedSorter$setMaximizedPosition(left + 7 + sortGroupX, searchWidth);
                 }
                 transferToInventoryButton.setPosition(new Position(

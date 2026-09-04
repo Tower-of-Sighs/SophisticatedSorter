@@ -171,4 +171,12 @@ public final class ClientUtils {
         }
         return current;
     }
+
+    public static boolean hasContainerSettings() {
+        return platform().hasContainerSettings();
+    }
+
+    public static void openSettingsRequested(boolean playerInventoryScreen) {
+        platform().openSettingsRequested(playerInventoryScreen);
+    }
 }

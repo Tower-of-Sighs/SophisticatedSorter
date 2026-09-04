@@ -15,7 +15,9 @@ public final class FabricSorterCommands implements SorterCommands<ServerPlayer> 
 
     @Override
     public void sort(ServerPlayer player, SortRequest request) {
-        CoreUtils.executeSort(player, request);
+        if (!com.sighs.sophisticatedsorter.settings.ContainerSettingsSort.trySortSettingsAware(player, request)) {
+            CoreUtils.executeSort(player, request);
+        }
     }
 
     @Override

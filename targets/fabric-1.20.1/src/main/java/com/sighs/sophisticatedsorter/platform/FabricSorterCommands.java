@@ -3,6 +3,7 @@ package com.sighs.sophisticatedsorter.platform;
 import com.sighs.sophisticatedsorter.common.SortRequest;
 import com.sighs.sophisticatedsorter.common.SorterCommands;
 import com.sighs.sophisticatedsorter.common.TransferRequest;
+import com.sighs.sophisticatedsorter.settings.ContainerSettingsSort;
 import com.sighs.sophisticatedsorter.utils.CoreUtils;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -15,7 +16,9 @@ public final class FabricSorterCommands implements SorterCommands<ServerPlayer> 
 
     @Override
     public void sort(ServerPlayer player, SortRequest request) {
-        CoreUtils.executeSort(player, request);
+        if (!ContainerSettingsSort.trySortSettingsAware(player, request)) {
+            CoreUtils.executeSort(player, request);
+        }
     }
 
     @Override

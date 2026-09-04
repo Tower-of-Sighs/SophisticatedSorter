@@ -3,4 +3,12 @@
   "key.sophisticatedsorter.sort": "Sort Container",
   "key.sophisticatedsorter.disable": "Disable buttons on current Container",
   "gui.sophisticatedsorter.drag_hint": "Right-click drag to move, press %s to hide",
+  "gui.sophisticatedsorter.settings.open": "Container Settings",
+  "gui.sophisticatedsorter.settings.player_inventory": "Player Inventory Settings",
+  "gui.sophisticatedsorter.settings.main": "Main",
+  "gui.sophisticatedsorter.settings.main.tooltip": "Main Settings",
+  "gui.sophisticatedsorter.settings.context": "Container",
+  "gui.sophisticatedsorter.settings.context.tooltip": "These settings apply to this container only.",
+  "gui.sophisticatedsorter.return_to_container.tooltip": "Back to Container",
+  "gui.sophisticatedsorter.settings.title": "Container Settings"
 }
